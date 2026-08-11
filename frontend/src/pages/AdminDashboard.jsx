@@ -69,7 +69,7 @@ function MediaUploader({ section, config, setConfig, uploadFiles }) {
       ...prev,
       [section]: {
         ...prev[section],
-        [field]: multi ? [...(prev[section][field] || []), ...localUrls] : localUrls
+        [field]: multi ? [...(prev[section][field] || []), ...localUrls] : localUrls[0]
       }
     }));
     // Upload in background and replace local URLs with real Blob URLs
@@ -79,8 +79,8 @@ function MediaUploader({ section, config, setConfig, uploadFiles }) {
       setConfig(prev => {
         const current = prev[section][field] || [];
         const replaced = multi
-          ? [...current.filter(u => !localUrls.includes(u)), ...uploaded]
-          : uploaded;
+          ? [...(Array.isArray(current) ? current : []).filter(u => !localUrls.includes(u)), ...uploaded]
+          : uploaded[0];
         return { ...prev, [section]: { ...prev[section], [field]: replaced } };
       });
     } finally {

@@ -45,7 +45,7 @@ export default function MediaPlayer({
 
   // Mode 2: two_videos
   if (mediaMode === 'two_videos') {
-    const introSrc = introVideo || videos[0];
+    const introSrc = (Array.isArray(introVideo) ? introVideo[0] : introVideo) || videos[0];
     const mainSrc = videos[1] || videos[0] || introSrc;
     return (
       <div className={`relative overflow-hidden rounded-3xl bg-black ${className}`}>
