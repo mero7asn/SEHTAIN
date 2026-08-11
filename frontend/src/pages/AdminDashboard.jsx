@@ -53,43 +53,59 @@ const paymentArabicDisplay = {
 };
 
 // Reusable media uploader for site config sections (mainHero, comingSoonHero)
-function MediaUploader({ section, config, setConfig, uploadFiles, isUploading, setIsUploading }) {
+function MediaUploader({ section, config, setConfig, uploadFiles }) {
+  const [uploading, setUploading] = useState(false);
   const sec = config[section] || {};
   const mode = sec.mediaMode || 'single_image';
 
-  const setMode = (m) => setConfig({ ...config, [section]: { ...sec, mediaMode: m } });
+  const setMode = (m) => setConfig(prev => ({ ...prev, [section]: { ...prev[section], mediaMode: m } }));
 
-  const handleUpload = async (files, field, multi) => {
-    setIsUploading(true);
+  const handleUpload = async (e, field, multi) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    // Show local previews immediately — no reload
+    const localUrls = files.map(f => URL.createObjectURL(f));
+    setConfig(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [field]: multi ? [...(prev[section][field] || []), ...localUrls] : localUrls
+      }
+    }));
+    // Upload in background and replace local URLs with real Blob URLs
+    setUploading(true);
     try {
-      const uploaded = await uploadFiles(Array.from(files));
-      setConfig(prev => ({
-        ...prev,
-        [section]: {
-          ...prev[section],
-          [field]: multi ? [...(prev[section][field] || []), ...uploaded] : uploaded
-        }
-      }));
+      const uploaded = await uploadFiles(files);
+      setConfig(prev => {
+        const current = prev[section][field] || [];
+        const replaced = multi
+          ? [...current.filter(u => !localUrls.includes(u)), ...uploaded]
+          : uploaded;
+        return { ...prev, [section]: { ...prev[section], [field]: replaced } };
+      });
     } finally {
-      setIsUploading(false);
+      setUploading(false);
     }
   };
 
   const remove = (field, idx) => setConfig(prev => ({
     ...prev,
-    [section]: { ...prev[section], [field]: prev[section][field].filter((_, i) => i !== idx) }
+    [section]: { ...prev[section], [field]: (prev[section][field] || []).filter((_, i) => i !== idx) }
   }));
 
   return (
     <div className="space-y-3 border-t border-slate-100 pt-4">
-      <label className="block font-extrabold text-slate-800 text-sm">وسائط القسم (صور / فيديوهات)</label>
+      <div className="flex items-center justify-between">
+        <label className="block font-extrabold text-slate-800 text-sm">وسائط القسم (صور / فيديوهات)</label>
+        {uploading && <span className="text-xs text-brand-600 font-bold animate-pulse">جاري الرفع...</span>}
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {[
           { value: 'single_image', label: 'صورة واحدة', icon: '🖼️' },
-          { value: 'loop_images', label: 'عدة صور (كاروسيل)', icon: '🎠' },
+          { value: 'loop_images',  label: 'عدة صور (كاروسيل)', icon: '🎠' },
           { value: 'single_video', label: 'فيديو واحد', icon: '🎬' },
-          { value: 'two_videos', label: 'فيديو مقدمة + رئيسي', icon: '🎥' },
-          { value: 'loop_videos', label: 'عدة فيديوهات', icon: '📽️' },
+          { value: 'two_videos',   label: 'فيديو مقدمة + رئيسي', icon: '🎥' },
+          { value: 'loop_videos',  label: 'عدة فيديوهات', icon: '📽️' },
         ].map(opt => (
           <label key={opt.value} className={`flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer text-xs transition ${
             mode === opt.value ? 'border-brand-500 bg-brand-50 text-brand-800' : 'border-slate-200 bg-slate-50'
@@ -104,8 +120,9 @@ function MediaUploader({ section, config, setConfig, uploadFiles, isUploading, s
         {(mode === 'single_image' || mode === 'loop_images') && (
           <div>
             <label className="block font-bold text-slate-700 mb-2 text-xs">📤 {mode === 'single_image' ? 'رفع صورة واحدة' : 'رفع عدة صور'}</label>
-            <input type="file" accept="image/*" multiple={mode === 'loop_images'} disabled={isUploading}
-              onChange={(e) => handleUpload(e.target.files, 'images', mode === 'loop_images')} className="w-full text-xs" />
+            <input key={`${section}-img-${(sec.images||[]).length}`} type="file" accept="image/*"
+              multiple={mode === 'loop_images'} disabled={uploading}
+              onChange={(e) => handleUpload(e, 'images', mode === 'loop_images')} className="w-full text-xs" />
             <div className="mt-2 flex flex-wrap gap-2">
               {(sec.images || []).map((src, i) => (
                 <div key={i} className="relative">
@@ -120,8 +137,9 @@ function MediaUploader({ section, config, setConfig, uploadFiles, isUploading, s
         {(mode === 'single_video' || mode === 'loop_videos') && (
           <div>
             <label className="block font-bold text-slate-700 mb-2 text-xs">📤 {mode === 'single_video' ? 'رفع فيديو واحد' : 'رفع عدة فيديوهات'}</label>
-            <input type="file" accept="video/*" multiple={mode === 'loop_videos'} disabled={isUploading}
-              onChange={(e) => handleUpload(e.target.files, 'videos', mode === 'loop_videos')} className="w-full text-xs" />
+            <input key={`${section}-vid-${(sec.videos||[]).length}`} type="file" accept="video/*"
+              multiple={mode === 'loop_videos'} disabled={uploading}
+              onChange={(e) => handleUpload(e, 'videos', mode === 'loop_videos')} className="w-full text-xs" />
             <div className="mt-2 flex flex-wrap gap-2">
               {(sec.videos || []).map((src, i) => (
                 <div key={i} className="relative">
@@ -137,19 +155,19 @@ function MediaUploader({ section, config, setConfig, uploadFiles, isUploading, s
           <div className="space-y-4">
             <div>
               <label className="block font-bold text-slate-700 mb-1 text-xs">🎬 فيديو المقدمة (مرة واحدة)</label>
-              <input type="file" accept="video/*" disabled={isUploading}
-                onChange={(e) => handleUpload(e.target.files, 'introVideo', false)} className="w-full text-xs" />
+              <input key={`${section}-intro-${sec.introVideo}`} type="file" accept="video/*" disabled={uploading}
+                onChange={(e) => handleUpload(e, 'introVideo', false)} className="w-full text-xs" />
               {sec.introVideo && (
                 <div className="mt-2 relative inline-block">
-                  <video src={sec.introVideo} controls className="w-48 h-28 rounded-xl border border-slate-200" />
-                  <button type="button" onClick={() => setConfig({ ...config, [section]: { ...sec, introVideo: '' } })} className="absolute -top-1.5 -left-1.5 bg-rose-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">✕</button>
+                  <video src={Array.isArray(sec.introVideo) ? sec.introVideo[0] : sec.introVideo} controls className="w-48 h-28 rounded-xl border border-slate-200" />
+                  <button type="button" onClick={() => setConfig(prev => ({ ...prev, [section]: { ...prev[section], introVideo: '' } }))} className="absolute -top-1.5 -left-1.5 bg-rose-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">✕</button>
                 </div>
               )}
             </div>
             <div>
               <label className="block font-bold text-slate-700 mb-1 text-xs">🔁 الفيديو الرئيسي (يتكرر)</label>
-              <input type="file" accept="video/*" disabled={isUploading}
-                onChange={(e) => handleUpload(e.target.files, 'videos', false)} className="w-full text-xs" />
+              <input key={`${section}-mainvid-${(sec.videos||[]).length}`} type="file" accept="video/*" disabled={uploading}
+                onChange={(e) => handleUpload(e, 'videos', false)} className="w-full text-xs" />
               {(sec.videos || []).map((src, i) => (
                 <div key={i} className="mt-2 relative inline-block">
                   <video src={src} controls className="w-48 h-28 rounded-xl border border-slate-200" />
@@ -1060,8 +1078,6 @@ export default function AdminDashboard() {
                       config={siteConfig}
                       setConfig={setSiteConfig}
                       uploadFiles={uploadFiles}
-                      isUploading={isUploadingMedia}
-                      setIsUploading={setIsUploadingMedia}
                     />
                   </div>
 
@@ -1155,8 +1171,6 @@ export default function AdminDashboard() {
                         config={siteConfig}
                         setConfig={setSiteConfig}
                         uploadFiles={uploadFiles}
-                        isUploading={isUploadingMedia}
-                        setIsUploading={setIsUploadingMedia}
                       />
                     </div>
 
