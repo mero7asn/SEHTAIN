@@ -42,7 +42,7 @@ export default function Home() {
     <div className="space-y-16 pb-16 bg-white text-zinc-900">
 
       {/* 1. Main Hero Section */}
-      <section className="relative overflow-hidden rounded-3xl mx-4 sm:mx-6 lg:mx-8 mt-6 shadow-lg h-[56vw] max-h-[420px] sm:max-h-[500px]">
+      <section className="relative overflow-hidden rounded-3xl mx-6 sm:mx-10 lg:mx-16 mt-6 shadow-lg h-[56vw] max-h-[420px] sm:max-h-[500px]">
         {/* Full-bleed media */}
         <MediaPlayer
           mediaMode={mainHero.mediaMode || 'single_image'}
@@ -165,7 +165,7 @@ export default function Home() {
 
       {/* 3. Coming Soon Hero Section */}
       {comingSoonHero.enabled && (
-        <section className="relative overflow-hidden rounded-3xl mx-4 sm:mx-6 lg:mx-8 shadow-lg h-[50vw] max-h-[360px] sm:max-h-[440px]">
+        <section className="relative overflow-hidden rounded-3xl mx-6 sm:mx-10 lg:mx-16 shadow-lg h-[50vw] max-h-[360px] sm:max-h-[440px]">
           <MediaPlayer
             mediaMode={comingSoonHero.mediaMode || 'single_image'}
             images={comingSoonHero.images || []}
