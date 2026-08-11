@@ -42,7 +42,7 @@ export default function Home() {
     <div className="space-y-16 pb-16 bg-white text-zinc-900">
 
       {/* 1. Main Hero Section */}
-      <section className="relative overflow-hidden rounded-3xl mx-4 sm:mx-6 lg:mx-8 mt-6 shadow-lg">
+      <section className="relative overflow-hidden rounded-3xl mx-4 sm:mx-6 lg:mx-8 mt-6 shadow-lg max-h-[420px] sm:max-h-[500px]">
         {/* Full-bleed media */}
         <MediaPlayer
           mediaMode={mainHero.mediaMode || 'single_image'}
@@ -50,7 +50,7 @@ export default function Home() {
           videos={mainHero.videos || []}
           introVideo={mainHero.introVideo || ''}
           defaultImage="https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=1600&q=80"
-          className="w-full"
+          className="w-full h-full"
         />
         {/* Text overlay — only shown if title or description is set */}
         {(mainHero.title || mainHero.description) && (
@@ -165,14 +165,14 @@ export default function Home() {
 
       {/* 3. Coming Soon Hero Section */}
       {comingSoonHero.enabled && (
-        <section className="relative overflow-hidden rounded-3xl mx-4 sm:mx-6 lg:mx-8 shadow-lg">
+        <section className="relative overflow-hidden rounded-3xl mx-4 sm:mx-6 lg:mx-8 shadow-lg max-h-[360px] sm:max-h-[440px]">
           <MediaPlayer
             mediaMode={comingSoonHero.mediaMode || 'single_image'}
             images={comingSoonHero.images || []}
             videos={comingSoonHero.videos || []}
             introVideo={comingSoonHero.introVideo || ''}
             defaultImage="https://images.unsplash.com/photo-1527100673774-cce25eafaf7f?auto=format&fit=crop&w=1600&q=80"
-            className="w-full"
+            className="w-full h-full"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-sky-950/70 via-sky-900/30 to-transparent flex flex-col justify-center p-6 sm:p-10 lg:p-14">
             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white border border-white/30 px-3 py-1 rounded-full text-xs font-bold mb-4 w-fit">
