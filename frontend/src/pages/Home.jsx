@@ -41,23 +41,38 @@ export default function Home() {
   return (
     <div className="space-y-16 pb-16 bg-white text-zinc-900">
 
-      {/* 1. Main Hero Section (Ultra White & Minimalist Gray Accent) */}
-      <section className="relative bg-zinc-50 border border-zinc-200/80 text-zinc-900 rounded-3xl overflow-hidden shadow-xs mx-4 sm:mx-6 lg:mx-8 mt-6">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12 lg:py-20 relative z-10">
-
-          {/* Hero Media Player */}
-          <div className="relative w-full border border-zinc-200 rounded-3xl overflow-hidden bg-white shadow-2xs">
-            <MediaPlayer
-              mediaMode={mainHero.mediaMode || 'single_image'}
-              images={mainHero.images || []}
-              videos={mainHero.videos || []}
-              introVideo={mainHero.introVideo || ''}
-              defaultImage="https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=800&q=80"
-              className="w-full"
-            />
+      {/* 1. Main Hero Section */}
+      <section className="relative overflow-hidden rounded-3xl mx-4 sm:mx-6 lg:mx-8 mt-6 shadow-lg">
+        {/* Full-bleed media */}
+        <MediaPlayer
+          mediaMode={mainHero.mediaMode || 'single_image'}
+          images={mainHero.images || []}
+          videos={mainHero.videos || []}
+          introVideo={mainHero.introVideo || ''}
+          defaultImage="https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=1600&q=80"
+          className="w-full"
+        />
+        {/* Text overlay — only shown if title or description is set */}
+        {(mainHero.title || mainHero.description) && (
+          <div className="absolute inset-0 bg-gradient-to-t from-sky-950/70 via-sky-900/20 to-transparent flex flex-col justify-end p-6 sm:p-10 lg:p-14">
+            {mainHero.badge && (
+              <span className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white border border-white/30 px-3 py-1 rounded-full text-xs font-bold mb-3 w-fit">
+                <Droplets className="w-3.5 h-3.5" />
+                {mainHero.badge}
+              </span>
+            )}
+            {mainHero.title && (
+              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white leading-tight mb-2">
+                {mainHero.title}
+              </h1>
+            )}
+            {mainHero.description && (
+              <p className="text-white/80 text-sm sm:text-base max-w-xl">
+                {mainHero.description}
+              </p>
+            )}
           </div>
-
-        </div>
+        )}
       </section>
 
       {/* Quick Solutions Grid (Pristine White Cards) */}
@@ -148,37 +163,28 @@ export default function Home() {
         <ProductGrid products={activeProducts} loading={loading} />
       </section>
 
-      {/* 3. Coming Soon Hero Section (Clean White & Gray) */}
+      {/* 3. Coming Soon Hero Section */}
       {comingSoonHero.enabled && (
-        <section className="relative bg-zinc-50 border border-zinc-200 text-zinc-900 rounded-3xl overflow-hidden shadow-xs mx-4 sm:mx-6 lg:mx-8">
-          <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12 lg:py-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
-
-            <div className="space-y-5 text-right">
-              <div className="inline-flex items-center gap-2 bg-white text-zinc-800 border border-zinc-300 px-4 py-1.5 rounded-full text-xs font-bold shadow-2xs">
-                <Sparkles className="w-4 h-4 text-zinc-900" />
-                <span>{comingSoonHero.badge || 'قريباً جداً'}</span>
-              </div>
-
-              <h2 className="text-3xl sm:text-4xl font-black text-zinc-900">
-                {comingSoonHero.title || 'ابتكارات جديدة في عالم المياه'}
-              </h2>
-
-              <p className="text-zinc-600 text-sm sm:text-base leading-relaxed">
-                {comingSoonHero.description || 'نعمل على تطوير منتجات وأحجام جديدة تلبي أرقى معايير الاستدامة والنقاء. انتظرونا قريباً في الأسواق.'}
-              </p>
+        <section className="relative overflow-hidden rounded-3xl mx-4 sm:mx-6 lg:mx-8 shadow-lg">
+          <MediaPlayer
+            mediaMode={comingSoonHero.mediaMode || 'single_image'}
+            images={comingSoonHero.images || []}
+            videos={comingSoonHero.videos || []}
+            introVideo={comingSoonHero.introVideo || ''}
+            defaultImage="https://images.unsplash.com/photo-1527100673774-cce25eafaf7f?auto=format&fit=crop&w=1600&q=80"
+            className="w-full"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-sky-950/70 via-sky-900/30 to-transparent flex flex-col justify-center p-6 sm:p-10 lg:p-14">
+            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white border border-white/30 px-3 py-1 rounded-full text-xs font-bold mb-4 w-fit">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{comingSoonHero.badge || 'قريباً جداً'}</span>
             </div>
-
-            <div className="relative w-full border border-zinc-200 rounded-3xl overflow-hidden bg-white shadow-2xs">
-              <MediaPlayer
-                mediaMode={comingSoonHero.mediaMode || 'single_image'}
-                images={comingSoonHero.images || []}
-                videos={comingSoonHero.videos || []}
-                introVideo={comingSoonHero.introVideo || ''}
-                defaultImage="https://images.unsplash.com/photo-1527100673774-cce25eafaf7f?auto=format&fit=crop&w=800&q=80"
-                className="w-full"
-              />
-            </div>
-
+            <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight mb-3 max-w-lg">
+              {comingSoonHero.title || 'ابتكارات جديدة في عالم المياه'}
+            </h2>
+            <p className="text-white/80 text-sm sm:text-base max-w-md">
+              {comingSoonHero.description || 'نعمل على تطوير منتجات وأحجام جديدة تلبي أرقى معايير الاستدامة والنقاء.'}
+            </p>
           </div>
         </section>
       )}
