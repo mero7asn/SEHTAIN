@@ -11,6 +11,9 @@ router.post('/', protect, upload.array('files', 10), async (req, res) => {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: 'لم يتم رفع أي ملف' });
     }
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return res.status(500).json({ message: 'BLOB_READ_WRITE_TOKEN غير مضبوط في بيئة الخادم' });
+    }
     const urls = await Promise.all(
       req.files.map(async (file) => {
         const ext = path.extname(file.originalname);
@@ -18,12 +21,14 @@ router.post('/', protect, upload.array('files', 10), async (req, res) => {
         const blob = await put(filename, file.buffer, {
           access: 'public',
           contentType: file.mimetype,
+          token: process.env.BLOB_READ_WRITE_TOKEN,
         });
         return blob.url;
       })
     );
     res.json({ urls });
   } catch (err) {
+    console.error('Upload error:', err);
     res.status(500).json({ message: err.message || 'فشل رفع الملف' });
   }
 });
