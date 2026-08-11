@@ -56,7 +56,7 @@ export default function LogoVideo({ className = 'w-24 h-24', style = {} }) {
       )}
       <video
         ref={videoRef}
-        src="https://dhtl0a9roh8ffuzk.public.blob.vercel-storage.com/logo.mp4"
+        src="https://dhtl0a9roh8ffuzk.public.blob.vercel-storage.com/logo-v2.mp4"
         className="absolute inset-0 w-full h-full"
         style={{ objectFit: 'cover', opacity: loaded && !error ? 1 : 0 }}
         autoPlay
@@ -74,7 +74,7 @@ export function Favicon() {
 
   useEffect(() => {
     const video = document.createElement('video');
-    video.src = 'https://dhtl0a9roh8ffuzk.public.blob.vercel-storage.com/logo.mp4';
+    video.src = 'https://dhtl0a9roh8ffuzk.public.blob.vercel-storage.com/logo-v2.mp4';
     video.muted = true;
     video.playsInline = true;
     video.crossOrigin = 'anonymous';
