@@ -52,6 +52,118 @@ const paymentArabicDisplay = {
   stcpay: 'stcpay'
 };
 
+// Reusable media uploader for site config sections (mainHero, comingSoonHero)
+function MediaUploader({ section, config, setConfig, uploadFiles, isUploading, setIsUploading }) {
+  const sec = config[section] || {};
+  const mode = sec.mediaMode || 'single_image';
+
+  const setMode = (m) => setConfig({ ...config, [section]: { ...sec, mediaMode: m } });
+
+  const handleUpload = async (files, field, multi) => {
+    setIsUploading(true);
+    try {
+      const uploaded = await uploadFiles(Array.from(files));
+      setConfig(prev => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [field]: multi ? [...(prev[section][field] || []), ...uploaded] : uploaded
+        }
+      }));
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const remove = (field, idx) => setConfig(prev => ({
+    ...prev,
+    [section]: { ...prev[section], [field]: prev[section][field].filter((_, i) => i !== idx) }
+  }));
+
+  return (
+    <div className="space-y-3 border-t border-slate-100 pt-4">
+      <label className="block font-extrabold text-slate-800 text-sm">وسائط القسم (صور / فيديوهات)</label>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {[
+          { value: 'single_image', label: 'صورة واحدة', icon: '🖼️' },
+          { value: 'loop_images', label: 'عدة صور (كاروسيل)', icon: '🎠' },
+          { value: 'single_video', label: 'فيديو واحد', icon: '🎬' },
+          { value: 'two_videos', label: 'فيديو مقدمة + رئيسي', icon: '🎥' },
+          { value: 'loop_videos', label: 'عدة فيديوهات', icon: '📽️' },
+        ].map(opt => (
+          <label key={opt.value} className={`flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer text-xs transition ${
+            mode === opt.value ? 'border-brand-500 bg-brand-50 text-brand-800' : 'border-slate-200 bg-slate-50'
+          }`}>
+            <input type="radio" name={`${section}-mode`} value={opt.value} checked={mode === opt.value} onChange={() => setMode(opt.value)} className="accent-brand-600" />
+            {opt.icon} {opt.label}
+          </label>
+        ))}
+      </div>
+
+      <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-3">
+        {(mode === 'single_image' || mode === 'loop_images') && (
+          <div>
+            <label className="block font-bold text-slate-700 mb-2 text-xs">📤 {mode === 'single_image' ? 'رفع صورة واحدة' : 'رفع عدة صور'}</label>
+            <input type="file" accept="image/*" multiple={mode === 'loop_images'} disabled={isUploading}
+              onChange={(e) => handleUpload(e.target.files, 'images', mode === 'loop_images')} className="w-full text-xs" />
+            <div className="mt-2 flex flex-wrap gap-2">
+              {(sec.images || []).map((src, i) => (
+                <div key={i} className="relative">
+                  <img src={src} alt="" className="w-20 h-20 object-cover rounded-xl border border-slate-200" />
+                  <button type="button" onClick={() => remove('images', i)} className="absolute -top-1.5 -left-1.5 bg-rose-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">✕</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {(mode === 'single_video' || mode === 'loop_videos') && (
+          <div>
+            <label className="block font-bold text-slate-700 mb-2 text-xs">📤 {mode === 'single_video' ? 'رفع فيديو واحد' : 'رفع عدة فيديوهات'}</label>
+            <input type="file" accept="video/*" multiple={mode === 'loop_videos'} disabled={isUploading}
+              onChange={(e) => handleUpload(e.target.files, 'videos', mode === 'loop_videos')} className="w-full text-xs" />
+            <div className="mt-2 flex flex-wrap gap-2">
+              {(sec.videos || []).map((src, i) => (
+                <div key={i} className="relative">
+                  <video src={src} className="w-40 h-24 object-cover rounded-xl border border-slate-200" controls />
+                  <button type="button" onClick={() => remove('videos', i)} className="absolute -top-1.5 -left-1.5 bg-rose-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">✕</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {mode === 'two_videos' && (
+          <div className="space-y-4">
+            <div>
+              <label className="block font-bold text-slate-700 mb-1 text-xs">🎬 فيديو المقدمة (مرة واحدة)</label>
+              <input type="file" accept="video/*" disabled={isUploading}
+                onChange={(e) => handleUpload(e.target.files, 'introVideo', false)} className="w-full text-xs" />
+              {sec.introVideo && (
+                <div className="mt-2 relative inline-block">
+                  <video src={sec.introVideo} controls className="w-48 h-28 rounded-xl border border-slate-200" />
+                  <button type="button" onClick={() => setConfig({ ...config, [section]: { ...sec, introVideo: '' } })} className="absolute -top-1.5 -left-1.5 bg-rose-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">✕</button>
+                </div>
+              )}
+            </div>
+            <div>
+              <label className="block font-bold text-slate-700 mb-1 text-xs">🔁 الفيديو الرئيسي (يتكرر)</label>
+              <input type="file" accept="video/*" disabled={isUploading}
+                onChange={(e) => handleUpload(e.target.files, 'videos', false)} className="w-full text-xs" />
+              {(sec.videos || []).map((src, i) => (
+                <div key={i} className="mt-2 relative inline-block">
+                  <video src={src} controls className="w-48 h-28 rounded-xl border border-slate-200" />
+                  <button type="button" onClick={() => remove('videos', i)} className="absolute -top-1.5 -left-1.5 bg-rose-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">✕</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const { user, isAdmin } = useAuth();
   const { showToast } = useToast();
@@ -171,8 +283,7 @@ export default function AdminDashboard() {
     const res = await API.post('/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-    // Prepend base URL so images/videos are served correctly
-    return res.data.urls.map(u => `http://localhost:5000${u}`);
+    return res.data.urls;
   };
 
   // Handle Product Create / Update
@@ -926,41 +1037,32 @@ export default function AdminDashboard() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                       <div>
                         <label className="block font-bold text-slate-700 mb-1">الشارة العلويّة (Badge)</label>
-                        <input
-                          type="text"
-                          value={siteConfig.mainHero?.badge || ''}
-                          onChange={(e) => setSiteConfig({
-                            ...siteConfig,
-                            mainHero: { ...siteConfig.mainHero, badge: e.target.value }
-                          })}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3"
-                        />
+                        <input type="text" value={siteConfig.mainHero?.badge || ''}
+                          onChange={(e) => setSiteConfig({ ...siteConfig, mainHero: { ...siteConfig.mainHero, badge: e.target.value } })}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3" />
                       </div>
                       <div>
                         <label className="block font-bold text-slate-700 mb-1">العنوان الرئيسي (Title)</label>
-                        <input
-                          type="text"
-                          value={siteConfig.mainHero?.title || ''}
-                          onChange={(e) => setSiteConfig({
-                            ...siteConfig,
-                            mainHero: { ...siteConfig.mainHero, title: e.target.value }
-                          })}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-bold"
-                        />
+                        <input type="text" value={siteConfig.mainHero?.title || ''}
+                          onChange={(e) => setSiteConfig({ ...siteConfig, mainHero: { ...siteConfig.mainHero, title: e.target.value } })}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-bold" />
                       </div>
                       <div className="md:col-span-2">
                         <label className="block font-bold text-slate-700 mb-1">الوصف الفرعي (Description)</label>
-                        <textarea
-                          rows={2}
-                          value={siteConfig.mainHero?.description || ''}
-                          onChange={(e) => setSiteConfig({
-                            ...siteConfig,
-                            mainHero: { ...siteConfig.mainHero, description: e.target.value }
-                          })}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3"
-                        />
+                        <textarea rows={2} value={siteConfig.mainHero?.description || ''}
+                          onChange={(e) => setSiteConfig({ ...siteConfig, mainHero: { ...siteConfig.mainHero, description: e.target.value } })}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3" />
                       </div>
                     </div>
+                    {/* Media Uploader */}
+                    <MediaUploader
+                      section="mainHero"
+                      config={siteConfig}
+                      setConfig={setSiteConfig}
+                      uploadFiles={uploadFiles}
+                      isUploading={isUploadingMedia}
+                      setIsUploading={setIsUploadingMedia}
+                    />
                   </div>
 
                   {/* 2. Products Section Header (2 lines) */}
@@ -1026,47 +1128,36 @@ export default function AdminDashboard() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-purple-200">
                         <span className="font-extrabold text-slate-900 text-sm">عرض / إخفاء هيرو "قريباً" (Coming Soon Hero)</span>
-                        <button
-                          type="button"
-                          onClick={() => setSiteConfig({
-                            ...siteConfig,
-                            comingSoonHero: { ...siteConfig.comingSoonHero, enabled: !siteConfig.comingSoonHero?.enabled }
-                          })}
-                          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition flex items-center gap-2 ${
-                            siteConfig.comingSoonHero?.enabled ? 'bg-emerald-600 text-white' : 'bg-rose-100 text-rose-700'
-                          }`}
-                        >
+                        <button type="button"
+                          onClick={() => setSiteConfig({ ...siteConfig, comingSoonHero: { ...siteConfig.comingSoonHero, enabled: !siteConfig.comingSoonHero?.enabled } })}
+                          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition flex items-center gap-2 ${siteConfig.comingSoonHero?.enabled ? 'bg-emerald-600 text-white' : 'bg-rose-100 text-rose-700'}`}>
                           {siteConfig.comingSoonHero?.enabled ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                           <span>{siteConfig.comingSoonHero?.enabled ? 'ظاهر للزوار' : 'مخفي عن الزوار'}</span>
                         </button>
                       </div>
-
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                         <div>
                           <label className="block font-bold text-slate-700 mb-1">عنوان هيرو قريباً</label>
-                          <input
-                            type="text"
-                            value={siteConfig.comingSoonHero?.title || ''}
-                            onChange={(e) => setSiteConfig({
-                              ...siteConfig,
-                              comingSoonHero: { ...siteConfig.comingSoonHero, title: e.target.value }
-                            })}
-                            className="w-full bg-white border border-slate-200 rounded-xl p-3"
-                          />
+                          <input type="text" value={siteConfig.comingSoonHero?.title || ''}
+                            onChange={(e) => setSiteConfig({ ...siteConfig, comingSoonHero: { ...siteConfig.comingSoonHero, title: e.target.value } })}
+                            className="w-full bg-white border border-slate-200 rounded-xl p-3" />
                         </div>
                         <div>
                           <label className="block font-bold text-slate-700 mb-1">وصف هيرو قريباً</label>
-                          <input
-                            type="text"
-                            value={siteConfig.comingSoonHero?.description || ''}
-                            onChange={(e) => setSiteConfig({
-                              ...siteConfig,
-                              comingSoonHero: { ...siteConfig.comingSoonHero, description: e.target.value }
-                            })}
-                            className="w-full bg-white border border-slate-200 rounded-xl p-3"
-                          />
+                          <input type="text" value={siteConfig.comingSoonHero?.description || ''}
+                            onChange={(e) => setSiteConfig({ ...siteConfig, comingSoonHero: { ...siteConfig.comingSoonHero, description: e.target.value } })}
+                            className="w-full bg-white border border-slate-200 rounded-xl p-3" />
                         </div>
                       </div>
+                      {/* Media Uploader */}
+                      <MediaUploader
+                        section="comingSoonHero"
+                        config={siteConfig}
+                        setConfig={setSiteConfig}
+                        uploadFiles={uploadFiles}
+                        isUploading={isUploadingMedia}
+                        setIsUploading={setIsUploadingMedia}
+                      />
                     </div>
 
                     {/* Coming Soon Products Section Controls */}
