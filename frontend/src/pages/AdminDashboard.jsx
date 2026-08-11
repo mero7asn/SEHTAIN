@@ -53,7 +53,7 @@ const paymentArabicDisplay = {
 };
 
 // Reusable media uploader for site config sections (mainHero, comingSoonHero)
-function MediaUploader({ section, config, setConfig, uploadFiles }) {
+function MediaUploader({ section, config, setConfig, uploadFiles, onUploadingChange }) {
   const [uploading, setUploading] = useState(false);
   const sec = config[section] || {};
   const mode = sec.mediaMode || 'single_image';
@@ -74,6 +74,7 @@ function MediaUploader({ section, config, setConfig, uploadFiles }) {
     }));
     // Upload in background and replace local URLs with real Blob URLs
     setUploading(true);
+    onUploadingChange?.(true);
     try {
       const uploaded = await uploadFiles(files);
       setConfig(prev => {
@@ -85,6 +86,7 @@ function MediaUploader({ section, config, setConfig, uploadFiles }) {
       });
     } finally {
       setUploading(false);
+      onUploadingChange?.(false);
     }
   };
 
@@ -196,6 +198,7 @@ export default function AdminDashboard() {
   const [reviews, setReviews] = useState([]);
   const [siteConfig, setSiteConfig] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isMediaUploading, setIsMediaUploading] = useState(false);
   
   // Real-time Auto Refresh State
   const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState(true);
@@ -1040,10 +1043,11 @@ export default function AdminDashboard() {
                       showToast('فشل حفظ الإعدادات', 'error');
                     }
                   }}
-                  className="bg-brand-600 hover:bg-brand-700 text-white px-6 py-2.5 rounded-xl font-bold text-xs shadow-md transition flex items-center gap-2"
+                  disabled={isMediaUploading}
+                  className="bg-brand-600 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl font-bold text-xs shadow-md transition flex items-center gap-2"
                 >
                   <Check className="w-4 h-4" />
-                  <span>حفظ جميع التغييرات</span>
+                  <span>{isMediaUploading ? 'جاري رفع الوسائط...' : 'حفظ جميع التغييرات'}</span>
                 </button>
               </div>
 
@@ -1078,6 +1082,7 @@ export default function AdminDashboard() {
                       config={siteConfig}
                       setConfig={setSiteConfig}
                       uploadFiles={uploadFiles}
+                      onUploadingChange={setIsMediaUploading}
                     />
                   </div>
 
@@ -1171,6 +1176,7 @@ export default function AdminDashboard() {
                         config={siteConfig}
                         setConfig={setSiteConfig}
                         uploadFiles={uploadFiles}
+                        onUploadingChange={setIsMediaUploading}
                       />
                     </div>
 
