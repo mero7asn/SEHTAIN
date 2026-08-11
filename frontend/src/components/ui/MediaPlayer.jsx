@@ -18,6 +18,11 @@ export default function MediaPlayer({
   defaultImage = 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=800&q=80',
   className = ''
 }) {
+  // Normalize — DB may have saved a string instead of array
+  const imgList = Array.isArray(images) ? images : (images ? [images] : []);
+  const vidList = Array.isArray(videos) ? videos : (videos ? [videos] : []);
+  images = imgList;
+  videos = vidList;
   const [currentIdx, setCurrentIdx] = useState(0);
   const [twoVideosPhase, setTwoVideosPhase] = useState('intro'); // 'intro' | 'main'
   const videoRef = useRef(null);

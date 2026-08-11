@@ -60,29 +60,33 @@ function MediaUploader({ section, config, setConfig, uploadFiles, onUploadingCha
 
   const setMode = (m) => setConfig(prev => ({ ...prev, [section]: { ...prev[section], mediaMode: m } }));
 
+  // fields that must stay arrays vs scalar string
+  const isArrayField = (f) => f === 'videos' || f === 'images';
+
   const handleUpload = async (e, field, multi) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
-    // Show local previews immediately — no reload
     const localUrls = files.map(f => URL.createObjectURL(f));
+    // always store arrays for videos/images, string for introVideo
     setConfig(prev => ({
       ...prev,
       [section]: {
         ...prev[section],
-        [field]: multi ? [...(prev[section][field] || []), ...localUrls] : localUrls[0]
+        [field]: isArrayField(field)
+          ? [...(Array.isArray(prev[section][field]) ? prev[section][field] : []), ...localUrls]
+          : localUrls[0]
       }
     }));
-    // Upload in background and replace local URLs with real Blob URLs
     setUploading(true);
     onUploadingChange?.(true);
     try {
       const uploaded = await uploadFiles(files);
       setConfig(prev => {
-        const current = prev[section][field] || [];
-        const replaced = multi
-          ? [...(Array.isArray(current) ? current : []).filter(u => !localUrls.includes(u)), ...uploaded]
-          : uploaded[0];
-        return { ...prev, [section]: { ...prev[section], [field]: replaced } };
+        if (isArrayField(field)) {
+          const current = Array.isArray(prev[section][field]) ? prev[section][field] : [];
+          return { ...prev, [section]: { ...prev[section], [field]: [...current.filter(u => !localUrls.includes(u)), ...uploaded] } };
+        }
+        return { ...prev, [section]: { ...prev[section], [field]: uploaded[0] } };
       });
     } finally {
       setUploading(false);
