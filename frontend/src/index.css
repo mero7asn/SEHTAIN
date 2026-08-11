@@ -2,23 +2,23 @@
 
 @theme {
   --font-arabic: 'Tajawal', 'Cairo', sans-serif;
-  --color-brand-50: #ffffff;
-  --color-brand-100: #fafafa;
-  --color-brand-200: #f4f4f5;
-  --color-brand-300: #e4e4e7;
-  --color-brand-400: #d4d4d8;
-  --color-brand-500: #71717a;
-  --color-brand-600: #27272a;
-  --color-brand-700: #18181b;
-  --color-brand-800: #09090b;
-  --color-brand-900: #000000;
-  --color-brand-dark: #09090b;
+  --color-brand-50: #f0f9ff;
+  --color-brand-100: #e0f2fe;
+  --color-brand-200: #bae6fd;
+  --color-brand-300: #7dd3fc;
+  --color-brand-400: #38bdf8;
+  --color-brand-500: #0ea5e9;
+  --color-brand-600: #0284c7;
+  --color-brand-700: #0369a1;
+  --color-brand-800: #075985;
+  --color-brand-900: #0c4a6e;
+  --color-brand-dark: #0f172a;
 }
 
 body {
   font-family: 'Tajawal', 'Cairo', sans-serif;
   background-color: #ffffff;
-  color: #09090b;
+  color: #0f172a;
 }
 
 /* Custom scrollbar */
