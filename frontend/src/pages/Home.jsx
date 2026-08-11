@@ -42,7 +42,7 @@ export default function Home() {
     <div className="space-y-16 pb-16 bg-white text-zinc-900">
 
       {/* 1. Main Hero Section */}
-      <section className="relative overflow-hidden rounded-3xl mx-6 sm:mx-10 lg:mx-16 mt-6 shadow-lg h-[56vw] max-h-[420px] sm:max-h-[500px]">
+      <section className="relative overflow-hidden rounded-3xl mx-6 sm:mx-10 lg:mx-16 mt-6 shadow-lg h-[60vw] sm:h-[50vw] lg:h-[45vw] max-h-[600px]">
         {/* Full-bleed media */}
         <MediaPlayer
           mediaMode={mainHero.mediaMode || 'single_image'}
