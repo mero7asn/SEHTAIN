@@ -267,10 +267,10 @@ export default function AdminDashboard() {
     }
   }, [isAdmin]);
 
-  // Real-time Auto-Polling (Interval every 3 seconds)
+  // Real-time Auto-Polling (Interval every 3 seconds) — paused on settings tab
   useEffect(() => {
     let intervalId = null;
-    if (isAdmin && isAutoRefreshEnabled) {
+    if (isAdmin && isAutoRefreshEnabled && activeTab !== 'settings') {
       intervalId = setInterval(() => {
         fetchData(true);
       }, 3000);
@@ -278,7 +278,7 @@ export default function AdminDashboard() {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [isAdmin, isAutoRefreshEnabled]);
+  }, [isAdmin, isAutoRefreshEnabled, activeTab]);
 
   if (!user || !isAdmin) {
     return (
