@@ -38,12 +38,11 @@ export default function MediaPlayer({
     return () => clearInterval(timer);
   }, [mediaMode, images]);
 
-  // Mode 1: single_image
   if (mediaMode === 'single_image') {
     const imgSrc = images[0] || defaultImage;
     return (
-      <div className={`relative overflow-hidden rounded-3xl h-full ${className}`}>
-        <img src={imgSrc} alt="" className="w-full h-full object-cover block rounded-3xl" />
+      <div className={`absolute inset-0 overflow-hidden ${className}`}>
+        <img src={imgSrc} alt="" className="w-full h-full object-cover block" />
       </div>
     );
   }
@@ -53,12 +52,12 @@ export default function MediaPlayer({
     const introSrc = (Array.isArray(introVideo) ? introVideo[0] : introVideo) || videos[0];
     const mainSrc = videos[1] || videos[0] || introSrc;
     return (
-      <div className={`relative overflow-hidden rounded-3xl bg-black h-full ${className}`}>
+      <div className={`absolute inset-0 overflow-hidden bg-black ${className}`}>
         {twoVideosPhase === 'intro' ? (
           <video ref={videoRef} src={introSrc} autoPlay muted playsInline
-            onEnded={() => setTwoVideosPhase('main')} className="w-full h-full object-cover block rounded-3xl" />
+            onEnded={() => setTwoVideosPhase('main')} className="w-full h-full object-cover block" />
         ) : (
-          <video src={mainSrc} autoPlay loop muted playsInline className="w-full h-full object-cover block rounded-3xl" />
+          <video src={mainSrc} autoPlay loop muted playsInline className="w-full h-full object-cover block" />
         )}
       </div>
     );
@@ -67,23 +66,23 @@ export default function MediaPlayer({
   // Mode 3: single_video
   if (mediaMode === 'single_video') {
     const videoSrc = videos[0] || introVideo;
-    if (!videoSrc) return <div className={`relative overflow-hidden rounded-3xl h-full ${className}`}><img src={defaultImage} alt="" className="w-full h-full object-cover block rounded-3xl" /></div>;
+    if (!videoSrc) return <div className={`absolute inset-0 overflow-hidden ${className}`}><img src={defaultImage} alt="" className="w-full h-full object-cover block" /></div>;
     return (
-      <div className={`relative overflow-hidden rounded-3xl bg-black h-full ${className}`}>
-        <video src={videoSrc} autoPlay loop muted playsInline className="w-full h-full object-cover block rounded-3xl" />
+      <div className={`absolute inset-0 overflow-hidden bg-black ${className}`}>
+        <video src={videoSrc} autoPlay loop muted playsInline className="w-full h-full object-cover block" />
       </div>
     );
   }
 
   // Mode 4: loop_videos
   if (mediaMode === 'loop_videos') {
-    if (!videos.length) return <div className={`relative overflow-hidden rounded-3xl h-full ${className}`}><img src={defaultImage} alt="" className="w-full h-full object-cover block rounded-3xl" /></div>;
+    if (!videos.length) return <div className={`absolute inset-0 overflow-hidden ${className}`}><img src={defaultImage} alt="" className="w-full h-full object-cover block" /></div>;
     const currentVid = videos[currentIdx % videos.length];
     return (
-      <div className={`relative overflow-hidden rounded-3xl bg-black group h-full ${className}`}>
+      <div className={`absolute inset-0 overflow-hidden bg-black group ${className}`}>
         <video key={currentVid} src={currentVid} autoPlay muted playsInline
           onEnded={() => setCurrentIdx((prev) => (prev + 1) % videos.length)}
-          className="w-full h-full object-cover block rounded-3xl" />
+          className="w-full h-full object-cover block" />
         {videos.length > 1 && (
           <>
             <button onClick={() => setCurrentIdx((prev) => (prev - 1 + videos.length) % videos.length)}
@@ -111,8 +110,8 @@ export default function MediaPlayer({
     const list = images.length ? images : [defaultImage];
     const currentImg = list[currentIdx % list.length];
     return (
-      <div className={`relative overflow-hidden rounded-3xl group h-full ${className}`}>
-        <img key={currentImg} src={currentImg} alt="" className="w-full h-full object-cover block rounded-3xl transition-opacity duration-500" />
+      <div className={`absolute inset-0 overflow-hidden group ${className}`}>
+        <img key={currentImg} src={currentImg} alt="" className="w-full h-full object-cover block transition-opacity duration-500" />
         {list.length > 1 && (
           <>
             <button onClick={() => setCurrentIdx((prev) => (prev - 1 + list.length) % list.length)}
@@ -136,8 +135,8 @@ export default function MediaPlayer({
   }
 
   return (
-    <div className={`relative overflow-hidden rounded-3xl h-full ${className}`}>
-      <img src={defaultImage} alt="" className="w-full h-full object-cover block rounded-3xl" />
+    <div className={`absolute inset-0 overflow-hidden ${className}`}>
+      <img src={defaultImage} alt="" className="w-full h-full object-cover block" />
     </div>
   );
 }

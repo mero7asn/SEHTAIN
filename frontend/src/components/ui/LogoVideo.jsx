@@ -17,10 +17,11 @@ export default function LogoVideo({ className = 'w-24 h-24', style = {} }) {
     video.addEventListener('loadeddata', onLoadedData);
     video.addEventListener('error', onError);
 
+    let playOnInteraction;
     const playPromise = video.play();
     if (playPromise) {
       playPromise.catch(() => {
-        const playOnInteraction = () => {
+        playOnInteraction = () => {
           video.play().catch(() => {});
           document.removeEventListener('click', playOnInteraction);
           document.removeEventListener('touchstart', playOnInteraction);
@@ -34,8 +35,10 @@ export default function LogoVideo({ className = 'w-24 h-24', style = {} }) {
       video.removeEventListener('canplay', onCanPlay);
       video.removeEventListener('loadeddata', onLoadedData);
       video.removeEventListener('error', onError);
-      document.removeEventListener('click', playOnInteraction);
-      document.removeEventListener('touchstart', playOnInteraction);
+      if (playOnInteraction) {
+        document.removeEventListener('click', playOnInteraction);
+        document.removeEventListener('touchstart', playOnInteraction);
+      }
     };
   }, []);
 
