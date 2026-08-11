@@ -46,14 +46,14 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12 lg:py-20 relative z-10">
 
           {/* Hero Media Player */}
-          <div className="relative h-80 sm:h-96 lg:h-[420px] w-full border border-zinc-200 rounded-3xl overflow-hidden bg-white shadow-2xs">
+          <div className="relative w-full border border-zinc-200 rounded-3xl overflow-hidden bg-white shadow-2xs">
             <MediaPlayer
               mediaMode={mainHero.mediaMode || 'single_image'}
               images={mainHero.images || []}
               videos={mainHero.videos || []}
               introVideo={mainHero.introVideo || ''}
               defaultImage="https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=800&q=80"
-              className="w-full h-full"
+              className="w-full"
             />
           </div>
 
@@ -168,14 +168,14 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="relative h-72 sm:h-80 lg:h-96 w-full border border-zinc-200 rounded-3xl overflow-hidden bg-white shadow-2xs">
+            <div className="relative w-full border border-zinc-200 rounded-3xl overflow-hidden bg-white shadow-2xs">
               <MediaPlayer
                 mediaMode={comingSoonHero.mediaMode || 'single_image'}
                 images={comingSoonHero.images || []}
                 videos={comingSoonHero.videos || []}
                 introVideo={comingSoonHero.introVideo || ''}
                 defaultImage="https://images.unsplash.com/photo-1527100673774-cce25eafaf7f?auto=format&fit=crop&w=800&q=80"
-                className="w-full h-full"
+                className="w-full"
               />
             </div>
 

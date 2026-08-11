@@ -37,42 +37,23 @@ export default function MediaPlayer({
   if (mediaMode === 'single_image') {
     const imgSrc = images[0] || defaultImage;
     return (
-      <div className={`relative flex justify-center items-center overflow-hidden rounded-3xl ${className}`}>
-        <img
-          src={imgSrc}
-          alt=""
-          className="w-full h-full object-cover rounded-3xl drop-shadow-xl"
-        />
+      <div className={`relative overflow-hidden rounded-3xl ${className}`}>
+        <img src={imgSrc} alt="" className="w-full h-auto block rounded-3xl" />
       </div>
     );
   }
 
-  // Mode 2: two_videos (intro video 1 time -> main video loops)
+  // Mode 2: two_videos
   if (mediaMode === 'two_videos') {
     const introSrc = introVideo || videos[0];
     const mainSrc = videos[1] || videos[0] || introSrc;
-
     return (
-      <div className={`relative overflow-hidden rounded-3xl bg-slate-950 flex items-center justify-center ${className}`}>
+      <div className={`relative overflow-hidden rounded-3xl bg-black ${className}`}>
         {twoVideosPhase === 'intro' ? (
-          <video
-            ref={videoRef}
-            src={introSrc}
-            autoPlay
-            muted
-            playsInline
-            onEnded={() => setTwoVideosPhase('main')}
-            className="w-full h-full object-cover rounded-3xl"
-          />
+          <video ref={videoRef} src={introSrc} autoPlay muted playsInline
+            onEnded={() => setTwoVideosPhase('main')} className="w-full h-auto block rounded-3xl" />
         ) : (
-          <video
-            src={mainSrc}
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover rounded-3xl"
-          />
+          <video src={mainSrc} autoPlay loop muted playsInline className="w-full h-auto block rounded-3xl" />
         )}
       </div>
     );
@@ -81,72 +62,37 @@ export default function MediaPlayer({
   // Mode 3: single_video
   if (mediaMode === 'single_video') {
     const videoSrc = videos[0] || introVideo;
-    if (!videoSrc) {
-      return (
-        <div className={`relative flex justify-center items-center ${className}`}>
-          <img src={defaultImage} alt="" className="w-full h-full object-cover rounded-3xl" />
-        </div>
-      );
-    }
-
+    if (!videoSrc) return <div className={`relative overflow-hidden rounded-3xl ${className}`}><img src={defaultImage} alt="" className="w-full h-auto block rounded-3xl" /></div>;
     return (
-      <div className={`relative overflow-hidden rounded-3xl bg-slate-950 flex items-center justify-center ${className}`}>
-        <video
-          src={videoSrc}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-full object-cover rounded-3xl"
-        />
+      <div className={`relative overflow-hidden rounded-3xl bg-black ${className}`}>
+        <video src={videoSrc} autoPlay loop muted playsInline className="w-full h-auto block rounded-3xl" />
       </div>
     );
   }
 
-  // Mode 4: loop_videos (several videos carousel)
+  // Mode 4: loop_videos
   if (mediaMode === 'loop_videos') {
-    if (!videos.length) {
-      return (
-        <div className={`relative flex justify-center items-center ${className}`}>
-          <img src={defaultImage} alt="" className="w-full h-full object-cover rounded-3xl" />
-        </div>
-      );
-    }
-
+    if (!videos.length) return <div className={`relative overflow-hidden rounded-3xl ${className}`}><img src={defaultImage} alt="" className="w-full h-auto block rounded-3xl" /></div>;
     const currentVid = videos[currentIdx % videos.length];
-
     return (
-      <div className={`relative overflow-hidden rounded-3xl bg-slate-950 flex items-center justify-center group ${className}`}>
-        <video
-          key={currentVid}
-          src={currentVid}
-          autoPlay
-          muted
-          playsInline
+      <div className={`relative overflow-hidden rounded-3xl bg-black group ${className}`}>
+        <video key={currentVid} src={currentVid} autoPlay muted playsInline
           onEnded={() => setCurrentIdx((prev) => (prev + 1) % videos.length)}
-          className="w-full h-full object-cover rounded-3xl"
-        />
+          className="w-full h-auto block rounded-3xl" />
         {videos.length > 1 && (
           <>
-            <button
-              onClick={() => setCurrentIdx((prev) => (prev - 1 + videos.length) % videos.length)}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-2 rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition"
-            >
+            <button onClick={() => setCurrentIdx((prev) => (prev - 1 + videos.length) % videos.length)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-2 rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition">
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <button
-              onClick={() => setCurrentIdx((prev) => (prev + 1) % videos.length)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-2 rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition"
-            >
+            <button onClick={() => setCurrentIdx((prev) => (prev + 1) % videos.length)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-2 rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition">
               <ChevronRight className="w-5 h-5" />
             </button>
             <div className="absolute bottom-3 flex gap-1.5 z-10">
               {videos.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentIdx(i)}
-                  className={`w-2 h-2 rounded-full transition-all ${i === currentIdx ? 'bg-white w-5' : 'bg-white/50'}`}
-                />
+                <button key={i} onClick={() => setCurrentIdx(i)}
+                  className={`w-2 h-2 rounded-full transition-all ${i === currentIdx ? 'bg-white w-5' : 'bg-white/50'}`} />
               ))}
             </div>
           </>
@@ -155,40 +101,27 @@ export default function MediaPlayer({
     );
   }
 
-  // Mode 5: loop_images (several images carousel)
+  // Mode 5: loop_images
   if (mediaMode === 'loop_images') {
     const list = images.length ? images : [defaultImage];
     const currentImg = list[currentIdx % list.length];
-
     return (
-      <div className={`relative overflow-hidden rounded-3xl flex items-center justify-center group ${className}`}>
-        <img
-          key={currentImg}
-          src={currentImg}
-          alt=""
-          className="w-full h-full object-cover rounded-3xl transition-opacity duration-500"
-        />
+      <div className={`relative overflow-hidden rounded-3xl group ${className}`}>
+        <img key={currentImg} src={currentImg} alt="" className="w-full h-auto block rounded-3xl transition-opacity duration-500" />
         {list.length > 1 && (
           <>
-            <button
-              onClick={() => setCurrentIdx((prev) => (prev - 1 + list.length) % list.length)}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/60 text-white p-2 rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition"
-            >
+            <button onClick={() => setCurrentIdx((prev) => (prev - 1 + list.length) % list.length)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/60 text-white p-2 rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition">
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <button
-              onClick={() => setCurrentIdx((prev) => (prev + 1) % list.length)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/60 text-white p-2 rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition"
-            >
+            <button onClick={() => setCurrentIdx((prev) => (prev + 1) % list.length)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/60 text-white p-2 rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition">
               <ChevronRight className="w-5 h-5" />
             </button>
             <div className="absolute bottom-3 flex gap-1.5 z-10">
               {list.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentIdx(i)}
-                  className={`w-2 h-2 rounded-full transition-all ${i === currentIdx ? 'bg-white w-5' : 'bg-white/50'}`}
-                />
+                <button key={i} onClick={() => setCurrentIdx(i)}
+                  className={`w-2 h-2 rounded-full transition-all ${i === currentIdx ? 'bg-white w-5' : 'bg-white/50'}`} />
               ))}
             </div>
           </>
@@ -198,8 +131,8 @@ export default function MediaPlayer({
   }
 
   return (
-    <div className={`relative flex justify-center items-center ${className}`}>
-      <img src={defaultImage} alt="" className="w-full h-full object-cover rounded-3xl" />
+    <div className={`relative overflow-hidden rounded-3xl ${className}`}>
+      <img src={defaultImage} alt="" className="w-full h-auto block rounded-3xl" />
     </div>
   );
 }
