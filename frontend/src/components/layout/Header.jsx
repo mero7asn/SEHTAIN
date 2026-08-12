@@ -20,7 +20,7 @@ export default function Header() {
   return (
     <>
       {/* Top Banner Notice */}
-      <div className="bg-white text-zinc-600 text-xs py-2.5 px-4 border-b border-zinc-200">
+      <div className="bg-[#E5E5E5] text-zinc-600 text-xs py-2.5 px-4 border-b border-zinc-200">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
           <div className="flex items-center gap-2 font-medium">
             <ShieldCheck className="w-3.5 h-3.5 text-zinc-900" />
@@ -34,7 +34,7 @@ export default function Header() {
       </div>
 
       {/* Main Header */}
-      <header className="sticky top-0 z-40 bg-white border-b border-zinc-200">
+      <header className="sticky top-0 z-40 bg-[#E5E5E5] border-b border-zinc-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             
@@ -209,7 +209,7 @@ export default function Header() {
 
         {/* Mobile Navigation Drawer */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-zinc-200 bg-white px-4 pt-3 pb-6 space-y-3 animate-fade-in">
+          <div className="lg:hidden border-t border-zinc-200 bg-[#E5E5E5] px-4 pt-3 pb-6 space-y-3 animate-fade-in">
             <Link 
               to="/" 
               onClick={() => setIsMobileMenuOpen(false)}
