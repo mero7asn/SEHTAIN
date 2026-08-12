@@ -230,9 +230,8 @@ export default function Home() {
                   { name: 'منتجع الساحل', logo: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=200&q=80' }
                 ]
             ).map((partner, idx) => (
-              <div key={idx} className="bg-zinc-50 p-4 rounded-2xl border border-zinc-200 flex flex-col items-center gap-2 hover:bg-zinc-100 transition">
-                <img src={partner.logo} alt={partner.name} className="w-12 h-12 object-cover rounded-xl border border-zinc-200" />
-                <span className="text-[11px] font-bold text-zinc-800 text-center">{partner.name}</span>
+              <div key={idx} className="bg-white p-4 rounded-2xl border border-zinc-200 flex items-center justify-center hover:shadow-md transition">
+                <img src={partner.logo} alt={partner.name} className="h-16 sm:h-20 w-auto object-contain" />
               </div>
             ))}
           </div>
