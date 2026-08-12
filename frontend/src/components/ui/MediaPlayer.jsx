@@ -52,7 +52,7 @@ export default function MediaPlayer({
     const introSrc = (Array.isArray(introVideo) ? introVideo[0] : introVideo) || videos[0];
     const mainSrc = videos[1] || videos[0] || introSrc;
     return (
-      <div className={`absolute inset-0 overflow-hidden bg-black ${className}`}>
+      <div className={`absolute inset-0 overflow-hidden bg-white ${className}`}>
         {twoVideosPhase === 'intro' ? (
           <video ref={videoRef} src={introSrc} autoPlay muted playsInline
             onEnded={() => setTwoVideosPhase('main')} className="w-full h-full object-cover block" />
@@ -68,7 +68,7 @@ export default function MediaPlayer({
     const videoSrc = videos[0] || introVideo;
     if (!videoSrc) return <div className={`absolute inset-0 overflow-hidden ${className}`}><img src={defaultImage} alt="" className="w-full h-full object-cover block" /></div>;
     return (
-      <div className={`absolute inset-0 overflow-hidden bg-black ${className}`}>
+      <div className={`absolute inset-0 overflow-hidden bg-white ${className}`}>
         <video src={videoSrc} autoPlay loop muted playsInline className="w-full h-full object-cover block" />
       </div>
     );
@@ -79,7 +79,7 @@ export default function MediaPlayer({
     if (!videos.length) return <div className={`absolute inset-0 overflow-hidden ${className}`}><img src={defaultImage} alt="" className="w-full h-full object-cover block" /></div>;
     const currentVid = videos[currentIdx % videos.length];
     return (
-      <div className={`absolute inset-0 overflow-hidden bg-black group ${className}`}>
+      <div className={`absolute inset-0 overflow-hidden bg-white group ${className}`}>
         <video key={currentVid} src={currentVid} autoPlay muted playsInline
           onEnded={() => setCurrentIdx((prev) => (prev + 1) % videos.length)}
           className="w-full h-full object-cover block" />

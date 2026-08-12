@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, ShieldCheck, Share2, Globe, MessageCircle, Send } from 'lucide-react';
-import LogoVideo from '../../components/ui/LogoVideo';
 import API from '../../services/api';
 
 export default function Footer() {
