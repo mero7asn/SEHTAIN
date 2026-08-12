@@ -143,6 +143,7 @@ function MediaUploader({ section, config, setConfig, uploadFiles, onUploadingCha
         {(mode === 'single_video' || mode === 'loop_videos') && (
           <div>
             <label className="block font-bold text-slate-700 mb-2 text-xs">📤 {mode === 'single_video' ? 'رفع فيديو واحد' : 'رفع عدة فيديوهات'}</label>
+            <p className="text-[10px] text-slate-400 mb-2">يدعم: MP4 (H.264/AAC) فقط لضمان التشغيل على جميع المتصفحات</p>
             <input key={`${section}-vid-${(sec.videos||[]).length}`} type="file" accept="video/*"
               multiple={mode === 'loop_videos'} disabled={uploading}
               onChange={(e) => handleUpload(e, 'videos', mode === 'loop_videos')} className="w-full text-xs" />
@@ -161,6 +162,7 @@ function MediaUploader({ section, config, setConfig, uploadFiles, onUploadingCha
           <div className="space-y-4">
             <div>
               <label className="block font-bold text-slate-700 mb-1 text-xs">🎬 فيديو المقدمة (مرة واحدة)</label>
+              <p className="text-[10px] text-slate-400 mb-2">يدعم: MP4 (H.264/AAC) فقط لضمان التشغيل على جميع المتصفحات</p>
               <input key={`${section}-intro-${sec.introVideo}`} type="file" accept="video/*" disabled={uploading}
                 onChange={(e) => handleUpload(e, 'introVideo', false)} className="w-full text-xs" />
               {sec.introVideo && (

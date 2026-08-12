@@ -88,6 +88,19 @@ export default function MediaPlayer({
     return () => clearInterval(timer);
   }, [mediaMode, images]);
 
+  const VideoErrorFallback = () => (
+    <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80">
+      <div className="text-center space-y-2 p-4">
+        <div className="w-16 h-16 mx-auto rounded-full bg-white/10 flex items-center justify-center">
+          <svg className="w-8 h-8 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+          </svg>
+        </div>
+        <p className="text-white/70 text-xs font-medium">تعذر تشغيل الفيديو</p>
+      </div>
+    </div>
+  );
+
   if (mediaMode === 'single_image') {
     const imgSrc = images[0] || defaultImage;
     return (
@@ -110,6 +123,7 @@ export default function MediaPlayer({
             muted
             playsInline
             preload="auto"
+            crossOrigin="anonymous"
             poster={defaultImage}
             onLoadedData={() => attemptPlay(videoRef.current)}
             onError={() => setPlayError(true)}
@@ -125,23 +139,21 @@ export default function MediaPlayer({
             muted
             playsInline
             preload="auto"
+            crossOrigin="anonymous"
             poster={defaultImage}
             onLoadedData={() => attemptPlay(videoRef.current)}
             onError={() => setPlayError(true)}
             className={`w-full h-full ${fitClass} block`}
           />
         )}
-        {playError && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-            <img src={defaultImage} alt="" className={`w-full h-full ${fitClass} block opacity-80`} />
-          </div>
-        )}
+        {playError && <VideoErrorFallback />}
       </div>
     );
   }
 
   if (mediaMode === 'single_video') {
-    if (!currentVideoSrc) {
+    const videoSrc = videos[0] || introVideo;
+    if (!videoSrc) {
       return (
         <div className={`absolute inset-0 overflow-hidden ${className}`}>
           <img src={defaultImage} alt="" className={`w-full h-full ${fitClass} block`} />
@@ -152,22 +164,19 @@ export default function MediaPlayer({
       <div className={`absolute inset-0 overflow-hidden bg-white ${className}`}>
         <video
           ref={videoRef}
-          src={currentVideoSrc}
+          src={videoSrc}
           autoPlay
           loop
           muted
           playsInline
           preload="auto"
+          crossOrigin="anonymous"
           poster={defaultImage}
           onLoadedData={() => attemptPlay(videoRef.current)}
           onError={() => setPlayError(true)}
           className={`w-full h-full ${fitClass} block`}
         />
-        {playError && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-            <img src={defaultImage} alt="" className={`w-full h-full ${fitClass} block opacity-80`} />
-          </div>
-        )}
+        {playError && <VideoErrorFallback />}
       </div>
     );
   }
@@ -191,6 +200,7 @@ export default function MediaPlayer({
           muted
           playsInline
           preload="auto"
+          crossOrigin="anonymous"
           poster={defaultImage}
           onLoadedData={() => attemptPlay(videoRef.current)}
           onError={() => setPlayError(true)}
@@ -222,11 +232,7 @@ export default function MediaPlayer({
             </div>
           </>
         )}
-        {playError && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-            <img src={defaultImage} alt="" className={`w-full h-full ${fitClass} block opacity-80`} />
-          </div>
-        )}
+        {playError && <VideoErrorFallback />}
       </div>
     );
   }

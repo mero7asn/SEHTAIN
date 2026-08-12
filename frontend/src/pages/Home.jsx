@@ -49,7 +49,7 @@ export default function Home() {
           images={mainHero.images || []}
           videos={mainHero.videos || []}
           introVideo={mainHero.introVideo || ''}
-          defaultImage="https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=1600&q=80"
+          defaultImage="https://images.unsplash.com/photo-1564419320461-6870880221ad?auto=format&fit=crop&w=1600&q=80"
           className="w-full h-full"
         />
         {/* Text overlay — only shown if title or description is set */}
@@ -171,7 +171,7 @@ export default function Home() {
             images={comingSoonHero.images || []}
             videos={comingSoonHero.videos || []}
             introVideo={comingSoonHero.introVideo || ''}
-            defaultImage="https://images.unsplash.com/photo-1527100673774-cce25eafaf7f?auto=format&fit=crop&w=1600&q=80"
+            defaultImage="https://images.unsplash.com/photo-1564419320461-6870880221ad?auto=format&fit=crop&w=1600&q=80"
             className="w-full h-full"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-sky-950/70 via-sky-900/30 to-transparent flex flex-col justify-center p-6 sm:p-10 lg:p-14">

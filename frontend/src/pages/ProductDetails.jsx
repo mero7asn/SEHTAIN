@@ -99,7 +99,7 @@ export default function ProductDetails() {
                 images={product.images || []}
                 videos={product.videos || []}
                 introVideo={product.introVideo || ''}
-                defaultImage="https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=800&q=80"
+                defaultImage="https://images.unsplash.com/photo-1564419320461-6870880221ad?auto=format&fit=crop&w=800&q=80"
                 className="w-full h-full"
                 objectFit="contain"
               />
