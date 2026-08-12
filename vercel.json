@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
   "builds": [
     {
       "src": "backend/server.js",
@@ -13,11 +15,14 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/backend/server.js"
+      "dest": "backend/server.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/frontend/dist/$1"
+      "dest": "/$1"
     }
-  ]
+  ],
+  "env": {
+    "VITE_API_URL": "/api"
+  }
 }
