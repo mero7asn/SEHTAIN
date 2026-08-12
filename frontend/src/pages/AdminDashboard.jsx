@@ -542,6 +542,48 @@ export default function AdminDashboard() {
     }
   };
 
+  // Partner Management Helpers
+  const addPartner = () => {
+    setSiteConfig(prev => ({
+      ...prev,
+      partnersSection: {
+        ...prev.partnersSection,
+        partners: [...(prev.partnersSection?.partners || []), { name: '', logo: '' }]
+      }
+    }));
+  };
+
+  const removePartner = (idx) => {
+    setSiteConfig(prev => ({
+      ...prev,
+      partnersSection: {
+        ...prev.partnersSection,
+        partners: (prev.partnersSection?.partners || []).filter((_, i) => i !== idx)
+      }
+    }));
+  };
+
+  const handlePartnerLogoUpload = async (e, idx) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    const localUrl = URL.createObjectURL(files[0]);
+    setSiteConfig(prev => {
+      const updated = [...(prev.partnersSection?.partners || [])];
+      updated[idx] = { ...updated[idx], logo: localUrl };
+      return { ...prev, partnersSection: { ...prev.partnersSection, partners: updated } };
+    });
+    try {
+      const uploaded = await uploadFiles(files);
+      setSiteConfig(prev => {
+        const updated = [...(prev.partnersSection?.partners || [])];
+        updated[idx] = { ...updated[idx], logo: uploaded[0] || '' };
+        return { ...prev, partnersSection: { ...prev.partnersSection, partners: updated } };
+      });
+    } catch (err) {
+      showToast('فشل رفع شعار الشريك', 'error');
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       
@@ -573,52 +615,7 @@ export default function AdminDashboard() {
         ].map((tab) => {
           const Icon = tab.icon;
           const isCurrent = activeTab === tab.id;
-  // Partner Management Helpers
-  // eslint-disable-next-line no-unused-vars
-  const addPartner = () => {
-    setSiteConfig(prev => ({
-      ...prev,
-      partnersSection: {
-        ...prev.partnersSection,
-        partners: [...(prev.partnersSection?.partners || []), { name: '', logo: '' }]
-      }
-    }));
-  };
-
-  // eslint-disable-next-line no-unused-vars
-  const removePartner = (idx) => {
-    setSiteConfig(prev => ({
-      ...prev,
-      partnersSection: {
-        ...prev.partnersSection,
-        partners: (prev.partnersSection?.partners || []).filter((_, i) => i !== idx)
-      }
-    }));
-  };
-
-  // eslint-disable-next-line no-unused-vars
-  const handlePartnerLogoUpload = async (e, idx) => {
-    const files = Array.from(e.target.files);
-    if (!files.length) return;
-    const localUrl = URL.createObjectURL(files[0]);
-    setSiteConfig(prev => {
-      const updated = [...(prev.partnersSection?.partners || [])];
-      updated[idx] = { ...updated[idx], logo: localUrl };
-      return { ...prev, partnersSection: { ...prev.partnersSection, partners: updated } };
-    });
-    try {
-      const uploaded = await uploadFiles(files);
-      setSiteConfig(prev => {
-        const updated = [...(prev.partnersSection?.partners || [])];
-        updated[idx] = { ...updated[idx], logo: uploaded[0] || '' };
-        return { ...prev, partnersSection: { ...prev.partnersSection, partners: updated } };
-      });
-    } catch (err) {
-      showToast('فشل رفع شعار الشريك', 'error');
-    }
-  };
-
-  return (
+          return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
