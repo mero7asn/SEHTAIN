@@ -5,6 +5,7 @@ import API from '../services/api';
 import { useCart } from '../context/CartContext';
 import RatingStars from '../components/ui/RatingStars';
 import Accordion from '../components/ui/Accordion';
+import MediaPlayer from '../components/ui/MediaPlayer';
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -91,19 +92,36 @@ export default function ProductDetails() {
         
         {/* Left/Right Images Column */}
         <div className="space-y-4">
-          <div className="bg-white rounded-3xl border border-slate-200 p-8 aspect-square flex items-center justify-center relative overflow-hidden shadow-xs">
-            <img 
-              src={product.images && product.images.length > 0 ? product.images[selectedImage] : ''} 
-              alt={product.name} 
-              className="max-h-full max-w-full object-contain"
-            />
-            <span className="absolute top-4 right-4 bg-brand-50 text-brand-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-brand-200">
-              {product.volume}
-            </span>
-          </div>
+          {['two_videos', 'single_video', 'loop_videos', 'loop_images'].includes(product.mediaMode) ? (
+            <div className="bg-white rounded-3xl border border-slate-200 aspect-square relative overflow-hidden shadow-xs">
+              <MediaPlayer
+                mediaMode={product.mediaMode || 'single_image'}
+                images={product.images || []}
+                videos={product.videos || []}
+                introVideo={product.introVideo || ''}
+                defaultImage="https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=800&q=80"
+                className="w-full h-full"
+                objectFit="contain"
+              />
+              <span className="absolute top-4 right-4 bg-brand-50 text-brand-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-brand-200 z-10">
+                {product.volume}
+              </span>
+            </div>
+          ) : (
+            <div className="bg-white rounded-3xl border border-slate-200 p-8 aspect-square flex items-center justify-center relative overflow-hidden shadow-xs">
+              <img 
+                src={product.images && product.images.length > 0 ? product.images[selectedImage] : ''} 
+                alt={product.name} 
+                className="max-h-full max-w-full object-contain"
+              />
+              <span className="absolute top-4 right-4 bg-brand-50 text-brand-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-brand-200">
+                {product.volume}
+              </span>
+            </div>
+          )}
 
           {/* Thumbnails */}
-          {product.images && product.images.length > 1 && (
+          {product.images && product.images.length > 1 && ['single_image', 'loop_images'].includes(product.mediaMode) && (
             <div className="flex items-center gap-3">
               {product.images.map((img, idx) => (
                 <button

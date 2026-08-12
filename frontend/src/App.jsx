@@ -7,7 +7,6 @@ import { CartProvider } from './context/CartContext';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import CartDrawer from './components/cart/CartDrawer';
-import { Favicon } from './components/ui/LogoVideo';
 
 import Home from './pages/Home';
 import Products from './pages/Products';
@@ -40,7 +39,6 @@ export default function App() {
           <Router>
             <div className="flex flex-col min-h-screen bg-slate-50 font-arabic text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
               <Header />
-              <Favicon />
               <CartDrawer />
               
               <main className="flex-grow">

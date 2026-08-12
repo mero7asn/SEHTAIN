@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ShoppingBag, Plus, Minus, Check } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import RatingStars from '../ui/RatingStars';
+import MediaPlayer from '../ui/MediaPlayer';
 
 export default function ProductCard({ product }) {
   const [quantity, setQuantity] = useState(1);
@@ -31,11 +32,15 @@ export default function ProductCard({ product }) {
     <div className="bg-white rounded-2xl border border-zinc-200 shadow-2xs hover:shadow-md hover:border-zinc-300 transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between overflow-hidden group">
       
       {/* Top Image Container */}
-      <Link to={`/products/${product._id}`} className="block relative bg-zinc-50 overflow-hidden p-6 aspect-square flex items-center justify-center border-b border-zinc-100">
-        <img 
-          src={product.images && product.images.length > 0 ? product.images[0] : 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=600&q=80'} 
-          alt={product.name} 
-          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+      <Link to={`/products/${product._id}`} className="block relative bg-zinc-50 overflow-hidden aspect-square border-b border-zinc-100">
+        <MediaPlayer
+          mediaMode={product.mediaMode || 'single_image'}
+          images={product.images || []}
+          videos={product.videos || []}
+          introVideo={product.introVideo || ''}
+          defaultImage="https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=600&q=80"
+          className="w-full h-full"
+          objectFit="contain"
         />
         
         {/* Discount Badge */}
