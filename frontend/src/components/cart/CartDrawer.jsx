@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, ShoppingBag, Trash2, Plus, Minus, ArrowRight, ShieldCheck } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
@@ -18,6 +18,17 @@ export default function CartDrawer() {
   } = useCart();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (isCartOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isCartOpen]);
+
   if (!isCartOpen) return null;
 
   return (
@@ -28,11 +39,11 @@ export default function CartDrawer() {
         onClick={() => setIsCartOpen(false)}
       />
 
-      <div className="fixed inset-y-0 left-0 max-w-full flex">
-        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between">
+      <div className="fixed inset-y-0 left-0 max-w-full flex justify-end">
+        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col h-full overflow-hidden">
           
           {/* Header */}
-          <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+          <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
             <div className="flex items-center gap-3">
               <div className="bg-brand-100 text-brand-600 p-2 rounded-xl">
                 <ShoppingBag className="w-5 h-5" />
@@ -122,7 +133,7 @@ export default function CartDrawer() {
 
           {/* Footer Summary */}
           {cart.length > 0 && (
-            <div className="p-5 border-t border-slate-100 bg-slate-50 space-y-3">
+            <div className="p-5 border-t border-slate-100 bg-slate-50 space-y-3 shrink-0">
               <div className="space-y-1.5 text-xs text-slate-600">
                 <div className="flex justify-between">
                   <span>المجموع الفرعي:</span>
@@ -168,7 +179,6 @@ export default function CartDrawer() {
               </div>
             </div>
           )}
-
         </div>
       </div>
     </div>

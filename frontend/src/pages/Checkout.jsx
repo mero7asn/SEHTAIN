@@ -311,7 +311,7 @@ export default function Checkout() {
         </div>
 
         {/* Order Summary Column (Col 3) */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-6 sticky top-28">
+         <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-6 lg:sticky lg:top-28">
           <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">ملخص الطلب</h3>
 
           {/* Mini Items list */}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, ShoppingBag, User, Menu, X, ShieldCheck, LogOut, ChevronDown, Globe } from 'lucide-react';
 import LogoVideo from '../ui/LogoVideo';
@@ -14,6 +14,17 @@ export default function Header() {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [lang, setLang] = useState('AR');
   const location = useLocation();
+
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileMenuOpen]);
 
   const isActive = (path) => location.pathname === path;
 
@@ -125,8 +136,8 @@ export default function Header() {
                       <ChevronDown className="w-3.5 h-3.5 text-zinc-500" />
                     </button>
 
-                    {isUserDropdownOpen && (
-                      <div className="absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-zinc-200 py-2 z-50 animate-fade-in text-sm">
+                     {isUserDropdownOpen && (
+                       <div className="absolute right-0 md:left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-zinc-200 py-2 z-50 animate-fade-in text-sm">
                         <div className="px-4 py-2 border-b border-zinc-100">
                           <p className="font-bold text-zinc-900 text-xs">{user.name}</p>
                           <p className="text-[11px] text-zinc-500 truncate">{user.email}</p>

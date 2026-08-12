@@ -63,7 +63,7 @@ export default function Footer() {
           <div className="lg:col-span-2">
             <h4 className="text-zinc-900 font-bold text-lg mb-6">النشرة البريدية</h4>
             <p className="text-zinc-700 text-sm mb-4">اشترك في نشرتنا البريدية للحصول على آخر العروض والتحديثات</p>
-            <div className="flex gap-2">
+             <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="email"
                 placeholder="البريد الإلكتروني"

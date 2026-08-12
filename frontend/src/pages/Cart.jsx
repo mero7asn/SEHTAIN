@@ -78,7 +78,7 @@ export default function Cart() {
                   </button>
                 </div>
 
-                <div className="text-left min-w-[80px]">
+                <div className="text-left min-w-[60px] sm:min-w-[80px]">
                   <span className="font-black text-slate-900 text-base">{(item.price * item.quantity).toFixed(2)}</span>
                   <span className="text-xs text-slate-500 mr-1">ريال</span>
                 </div>

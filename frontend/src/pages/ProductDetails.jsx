@@ -127,7 +127,7 @@ export default function ProductDetails() {
                 <button
                   key={idx}
                   onClick={() => setSelectedImage(idx)}
-                  className={`w-20 h-20 rounded-2xl border-2 p-2 bg-white overflow-hidden transition ${
+                  className={`w-14 h-14 sm:w-20 sm:h-20 rounded-2xl border-2 p-2 bg-white overflow-hidden transition ${
                     selectedImage === idx ? 'border-brand-600 shadow-md' : 'border-slate-200 opacity-60 hover:opacity-100'
                   }`}
                 >
