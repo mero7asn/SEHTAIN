@@ -6,7 +6,7 @@ export default function MediaPlayer({
   images = [],
   videos = [],
   introVideo = '',
-  defaultImage = 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=800&q=80',
+  defaultImage = 'https://images.unsplash.com/photo-1564419320461-6870880221ad?auto=format&fit=crop&w=800&q=80',
   className = '',
   objectFit = 'cover'
 }) {
@@ -128,7 +128,7 @@ export default function MediaPlayer({
             onLoadedData={() => attemptPlay(videoRef.current)}
             onError={() => setPlayError(true)}
             onEnded={() => setTwoVideosPhase('main')}
-            className={`w-full h-full ${fitClass} block`}
+            className={`w-full h-full ${fitClass} block object-position-center`}
           />
         ) : (
           <video
@@ -143,7 +143,7 @@ export default function MediaPlayer({
             poster={defaultImage}
             onLoadedData={() => attemptPlay(videoRef.current)}
             onError={() => setPlayError(true)}
-            className={`w-full h-full ${fitClass} block`}
+            className={`w-full h-full ${fitClass} block object-position-center`}
           />
         )}
         {playError && <VideoErrorFallback />}
@@ -174,7 +174,7 @@ export default function MediaPlayer({
           poster={defaultImage}
           onLoadedData={() => attemptPlay(videoRef.current)}
           onError={() => setPlayError(true)}
-          className={`w-full h-full ${fitClass} block`}
+          className={`w-full h-full ${fitClass} block object-position-center`}
         />
         {playError && <VideoErrorFallback />}
       </div>
@@ -205,7 +205,7 @@ export default function MediaPlayer({
           onLoadedData={() => attemptPlay(videoRef.current)}
           onError={() => setPlayError(true)}
           onEnded={() => setCurrentIdx((prev) => (prev + 1) % videos.length)}
-          className={`w-full h-full ${fitClass} block`}
+          className={`w-full h-full ${fitClass} block object-position-center`}
         />
         {videos.length > 1 && (
           <>
