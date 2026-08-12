@@ -40,7 +40,7 @@ export default function Header() {
             
             {/* Logo & Brand Name */}
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-16 h-16 bg-zinc-900 rounded-xl flex items-center justify-center overflow-hidden">
+              <div className="w-16 h-16 bg-[#E5E5E5] rounded-xl flex items-center justify-center overflow-hidden">
                 <LogoVideo className="w-full h-full" />
               </div>
               <div>

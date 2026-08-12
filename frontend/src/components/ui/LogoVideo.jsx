@@ -45,19 +45,19 @@ export default function LogoVideo({ className = 'w-24 h-24', style = {} }) {
   return (
     <div className={`relative ${className}`} style={style}>
       {!loaded && !error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-zinc-900 rounded-xl z-10">
-          <div className="w-3/5 h-3/5 rounded-full bg-white/20 animate-pulse" />
+        <div className="absolute inset-0 flex items-center justify-center bg-[#E5E5E5] rounded-xl z-10">
+          <div className="w-3/5 h-3/5 rounded-full bg-zinc-900/20 animate-pulse" />
         </div>
       )}
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-zinc-900 rounded-xl z-10">
-          <div className="text-white text-xs font-bold">S</div>
+        <div className="absolute inset-0 flex items-center justify-center bg-[#E5E5E5] rounded-xl z-10">
+          <div className="text-zinc-900 text-xs font-bold">S</div>
         </div>
       )}
       <video
         ref={videoRef}
         src="https://dhtl0a9roh8ffuzk.public.blob.vercel-storage.com/logo-v2.mp4"
-        className="absolute inset-0 w-full h-full"
+        className="absolute inset-0 w-full h-full bg-white"
         style={{ objectFit: 'cover', opacity: loaded && !error ? 1 : 0 }}
         autoPlay
         loop
