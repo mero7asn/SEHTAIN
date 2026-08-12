@@ -8,7 +8,7 @@ export default function MediaPlayer({
   introVideo = '',
   defaultImage = 'https://images.unsplash.com/photo-1564419320461-6870880221ad?auto=format&fit=crop&w=800&q=80',
   className = '',
-  objectFit = 'cover'
+  objectFit = 'contain'
 }) {
   const imgList = Array.isArray(images) ? images : (images ? [images] : []);
   const vidList = Array.isArray(videos) ? videos : (videos ? [videos] : []);
