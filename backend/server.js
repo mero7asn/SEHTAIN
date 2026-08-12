@@ -17,7 +17,12 @@ import uploadRoutes from './routes/uploadRoutes.js';
 import siteConfigRoutes from './routes/siteConfigRoutes.js';
 
 dotenv.config();
-connectDB();
+// Allow skipping DB connection for local smoke tests by setting SKIP_DB=true
+if (process.env.SKIP_DB !== 'true') {
+  connectDB();
+} else {
+  console.log('SKIP_DB=true set — skipping database connection');
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

@@ -2,6 +2,6 @@
   "name": "sehtain",
   "private": true,
   "scripts": {
-    "build": "cd frontend && npm install && npx vite build && cp -r dist ../dist"
+    "build": "cd frontend && npm install && npx vite build && npx --yes cpy-cli \"dist/**\" ../dist --parents"
   }
 }
