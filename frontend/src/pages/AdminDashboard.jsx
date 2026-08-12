@@ -573,7 +573,52 @@ export default function AdminDashboard() {
         ].map((tab) => {
           const Icon = tab.icon;
           const isCurrent = activeTab === tab.id;
-          return (
+  // Partner Management Helpers
+  // eslint-disable-next-line no-unused-vars
+  const addPartner = () => {
+    setSiteConfig(prev => ({
+      ...prev,
+      partnersSection: {
+        ...prev.partnersSection,
+        partners: [...(prev.partnersSection?.partners || []), { name: '', logo: '' }]
+      }
+    }));
+  };
+
+  // eslint-disable-next-line no-unused-vars
+  const removePartner = (idx) => {
+    setSiteConfig(prev => ({
+      ...prev,
+      partnersSection: {
+        ...prev.partnersSection,
+        partners: (prev.partnersSection?.partners || []).filter((_, i) => i !== idx)
+      }
+    }));
+  };
+
+  // eslint-disable-next-line no-unused-vars
+  const handlePartnerLogoUpload = async (e, idx) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    const localUrl = URL.createObjectURL(files[0]);
+    setSiteConfig(prev => {
+      const updated = [...(prev.partnersSection?.partners || [])];
+      updated[idx] = { ...updated[idx], logo: localUrl };
+      return { ...prev, partnersSection: { ...prev.partnersSection, partners: updated } };
+    });
+    try {
+      const uploaded = await uploadFiles(files);
+      setSiteConfig(prev => {
+        const updated = [...(prev.partnersSection?.partners || [])];
+        updated[idx] = { ...updated[idx], logo: uploaded[0] || '' };
+        return { ...prev, partnersSection: { ...prev.partnersSection, partners: updated } };
+      });
+    } catch (err) {
+      showToast('فشل رفع شعار الشريك', 'error');
+    }
+  };
+
+  return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -1235,7 +1280,95 @@ export default function AdminDashboard() {
 
                   </div>
 
-                  {/* 5. Footer Components Admin Control */}
+                   {/* Partners Section Controls */}
+                   <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-6">
+                     <h3 className="font-extrabold text-slate-900 text-lg border-b border-slate-100 pb-2">إدارة قسم الشركاء (Partners)</h3>
+
+                     <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200">
+                       <span className="font-extrabold text-slate-900 text-sm">عرض / إخفاء قسم الشركاء</span>
+                       <button type="button"
+                         onClick={() => setSiteConfig({
+                           ...siteConfig,
+                           partnersSection: { ...siteConfig.partnersSection, enabled: !siteConfig.partnersSection?.enabled }
+                         })}
+                         className={`px-4 py-2 rounded-xl text-xs font-extrabold transition flex items-center gap-2 ${siteConfig.partnersSection?.enabled ? 'bg-emerald-600 text-white' : 'bg-rose-100 text-rose-700'}`}>
+                         {siteConfig.partnersSection?.enabled ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                         <span>{siteConfig.partnersSection?.enabled ? 'ظاهر للزوار' : 'مخفي عن الزوار'}</span>
+                       </button>
+                     </div>
+
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                       <div>
+                         <label className="block font-bold text-slate-700 mb-1">العنوان</label>
+                         <input type="text" value={siteConfig.partnersSection?.title || ''}
+                           onChange={(e) => setSiteConfig({
+                             ...siteConfig,
+                             partnersSection: { ...siteConfig.partnersSection, title: e.target.value }
+                           })}
+                           className="w-full bg-white border border-slate-200 rounded-xl p-3" />
+                       </div>
+                       <div>
+                         <label className="block font-bold text-slate-700 mb-1">الوصف</label>
+                         <input type="text" value={siteConfig.partnersSection?.description || ''}
+                           onChange={(e) => setSiteConfig({
+                             ...siteConfig,
+                             partnersSection: { ...siteConfig.partnersSection, description: e.target.value }
+                           })}
+                           className="w-full bg-white border border-slate-200 rounded-xl p-3" />
+                       </div>
+                     </div>
+
+                     <div className="space-y-3">
+                       <div className="flex items-center justify-between">
+                         <span className="font-bold text-slate-800 text-xs">الشركاء الحاليون</span>
+                         <button type="button" onClick={addPartner}
+                           className="px-3 py-2 bg-brand-600 text-white rounded-xl text-xs font-bold hover:bg-brand-700 transition">
+                           + إضافة شريك
+                         </button>
+                       </div>
+
+                       {(siteConfig.partnersSection?.partners || []).map((partner, idx) => (
+                         <div key={idx} className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                             <div>
+                               <label className="block font-bold text-slate-700 mb-1 text-[11px]">اسم الشريك</label>
+                               <input type="text" value={partner.name || ''}
+                                 onChange={(e) => {
+                                   const updated = [...(siteConfig.partnersSection?.partners || [])];
+                                   updated[idx] = { ...updated[idx], name: e.target.value };
+                                   setSiteConfig({ ...siteConfig, partnersSection: { ...siteConfig.partnersSection, partners: updated } });
+                                 }}
+                                 className="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs" />
+                             </div>
+                             <div>
+                               <label className="block font-bold text-slate-700 mb-1 text-[11px]">رابط الشعار</label>
+                               <input type="text" value={partner.logo || ''}
+                                 onChange={(e) => {
+                                   const updated = [...(siteConfig.partnersSection?.partners || [])];
+                                   updated[idx] = { ...updated[idx], logo: e.target.value };
+                                   setSiteConfig({ ...siteConfig, partnersSection: { ...siteConfig.partnersSection, partners: updated } });
+                                 }}
+                                 className="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs" />
+                               <input key={`partner-upload-${idx}`} type="file" accept="image/*" disabled={uploading}
+                                 onChange={(e) => handlePartnerLogoUpload(e, idx)} className="mt-2 text-[11px]" />
+                             </div>
+                           </div>
+
+                           <div className="flex items-center justify-between">
+                             {partner.logo && (
+                               <img src={partner.logo} alt={partner.name} className="w-12 h-12 object-cover rounded-lg border border-slate-200" />
+                             )}
+                             <button type="button" onClick={() => removePartner(idx)}
+                               className="mr-auto px-3 py-1.5 bg-rose-100 text-rose-700 rounded-lg text-[11px] font-bold hover:bg-rose-200 transition">
+                               حذف الشريك
+                             </button>
+                           </div>
+                         </div>
+                       ))}
+                     </div>
+                   </div>
+
+                   {/* 5. Footer Components Admin Control */}
                   <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-6">
                     <h3 className="font-extrabold text-slate-900 text-lg border-b border-slate-100 pb-2">5. التحكم الشامل في مكونات الفوتر (Footer Customizer)</h3>
                     
