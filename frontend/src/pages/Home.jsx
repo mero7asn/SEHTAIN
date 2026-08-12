@@ -6,7 +6,14 @@ import ProductGrid from '../components/product/ProductGrid';
 import MediaPlayer from '../components/ui/MediaPlayer';
 
 export default function Home() {
-  const [config, setConfig] = useState(null);
+  const [config, setConfig] = useState(() => {
+    try {
+      const local = localStorage.getItem('sahtain_site_config');
+      return local ? JSON.parse(local) : null;
+    } catch {
+      return null;
+    }
+  });
   const [activeProducts, setActiveProducts] = useState([]);
   const [comingSoonProducts, setComingSoonProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +27,9 @@ export default function Home() {
           API.get('/products')
         ]);
         if (!mounted) return;
-        setConfig(configRes.data);
+        const cfg = configRes.data;
+        localStorage.setItem('sahtain_site_config', JSON.stringify(cfg));
+        setConfig(cfg);
 
         const allProds = prodRes.data || [];
         setActiveProducts(allProds.filter(p => !p.isComingSoon));
@@ -34,9 +43,18 @@ export default function Home() {
     };
     fetchData();
     const interval = setInterval(fetchData, 5000);
+    const handleStorage = (e) => {
+      if (e.key === 'sahtain_site_config' && e.newValue) {
+        try {
+          setConfig(JSON.parse(e.newValue));
+        } catch {}
+      }
+    };
+    window.addEventListener('storage', handleStorage);
     return () => {
       mounted = false;
       clearInterval(interval);
+      window.removeEventListener('storage', handleStorage);
     };
   }, []);
 

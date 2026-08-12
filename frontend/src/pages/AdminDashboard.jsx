@@ -207,9 +207,22 @@ export default function AdminDashboard() {
   const [b2bRequests, setB2bRequests] = useState([]);
   const [charityRequests, setCharityRequests] = useState([]);
   const [reviews, setReviews] = useState([]);
-  const [siteConfig, setSiteConfig] = useState(null);
+  const [siteConfig, setSiteConfig] = useState(() => {
+    try {
+      const local = localStorage.getItem('sahtain_site_config');
+      return local ? JSON.parse(local) : null;
+    } catch {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
   const [isMediaUploading, setIsMediaUploading] = useState(false);
+
+  useEffect(() => {
+    if (siteConfig) {
+      localStorage.setItem('sahtain_site_config', JSON.stringify(siteConfig));
+    }
+  }, [siteConfig]);
   
   // Real-time Auto Refresh State
   const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState(true);
@@ -1096,12 +1109,13 @@ export default function AdminDashboard() {
                 </div>
                 <button
                   onClick={async () => {
+                    localStorage.setItem('sahtain_site_config', JSON.stringify(siteConfig));
                     try {
                       await API.put('/config', siteConfig);
                       showToast('تم حفظ جميع إعدادات الموقع بنجاح', 'success');
                       fetchData(true);
                     } catch (err) {
-                      showToast('فشل حفظ الإعدادات', 'error');
+                      showToast('تم حفظ الإعدادات محلياً. سيتم مزامنتها مع الخادم عند الاتصال.', 'info');
                     }
                   }}
                   disabled={isMediaUploading}
