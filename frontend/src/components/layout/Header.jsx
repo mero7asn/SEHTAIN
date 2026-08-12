@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, ShoppingBag, User, Menu, X, ShieldCheck, LogOut, ChevronDown } from 'lucide-react';
-import LogoVideo, { Favicon } from '../ui/LogoVideo';
+import { Search, ShoppingBag, User, Menu, X, ShieldCheck, LogOut, ChevronDown, Globe } from 'lucide-react';
+import LogoVideo from '../ui/LogoVideo';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import SearchModal from '../ui/SearchModal';
@@ -12,13 +12,14 @@ export default function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [lang, setLang] = useState('AR');
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
 
   return (
     <>
-      {/* Top Banner Notice - Clean White & Grey */}
+      {/* Top Banner Notice */}
       <div className="bg-white text-zinc-600 text-xs py-2.5 px-4 border-b border-zinc-200">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
           <div className="flex items-center gap-2 font-medium">
@@ -32,168 +33,178 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Main Header - Pristine White */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-zinc-200 shadow-2xs">
-         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
-          
-          {/* Logo & Brand Name */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-24 h-24 bg-zinc-900 rounded-2xl flex items-center justify-center shadow-md group-hover:bg-black transition duration-300 overflow-hidden">
-              <LogoVideo className="w-full h-full" />
-            </div>
-            <div>
-              <span className="text-2xl font-black text-zinc-900 tracking-tight block leading-tight">صحتين</span>
-              <span className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase block">مياه نقية طبيعية</span>
-            </div>
-          </Link>
-
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-8 text-sm font-semibold text-zinc-700">
-            <Link 
-              to="/" 
-              className={`transition hover:text-zinc-900 py-1 border-b-2 ${isActive('/') ? 'text-zinc-900 border-zinc-900 font-bold' : 'border-transparent'}`}
-            >
-              الرئيسية
-            </Link>
-            <Link 
-              to="/products" 
-              className={`transition hover:text-zinc-900 py-1 border-b-2 ${isActive('/products') ? 'text-zinc-900 border-zinc-900 font-bold' : 'border-transparent'}`}
-            >
-              المنتجات
-            </Link>
-            <Link 
-              to="/individuals" 
-              className={`transition hover:text-zinc-900 py-1 border-b-2 ${isActive('/individuals') ? 'text-zinc-900 border-zinc-900 font-bold' : 'border-transparent'}`}
-            >
-              الأفراد والعائلات
-            </Link>
-            <Link 
-              to="/b2b" 
-              className={`transition hover:text-zinc-900 py-1 border-b-2 ${isActive('/b2b') ? 'text-zinc-900 border-zinc-900 font-bold' : 'border-transparent'}`}
-            >
-              الأعمال والضيافة
-            </Link>
-            <Link 
-              to="/charity" 
-              className={`transition hover:text-zinc-900 py-1 border-b-2 ${isActive('/charity') ? 'text-zinc-900 border-zinc-900 font-bold' : 'border-transparent'}`}
-            >
-              سقيا المساجد والخير
-            </Link>
-            <Link 
-              to="/about" 
-              className={`transition hover:text-zinc-900 py-1 border-b-2 ${isActive('/about') ? 'text-zinc-900 border-zinc-900 font-bold' : 'border-transparent'}`}
-            >
-              عن صحتين
-            </Link>
-          </nav>
-
-          {/* Header Controls (Search, Account, Cart, Mobile Menu) */}
-          <div className="flex items-center gap-3">
+      {/* Main Header */}
+      <header className="sticky top-0 z-40 bg-white border-b border-zinc-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
             
-            {/* Search Trigger Button */}
-            <button
-              onClick={() => setIsSearchOpen(true)}
-              className="p-2.5 rounded-xl text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 transition relative flex items-center justify-center border border-zinc-200"
-              title="ابحث عن منتج..."
-            >
-              <Search className="w-5 h-5" />
-            </button>
+            {/* Logo & Brand Name */}
+            <Link to="/" className="flex items-center gap-3 group">
+              <div className="w-16 h-16 bg-zinc-900 rounded-xl flex items-center justify-center overflow-hidden">
+                <LogoVideo className="w-full h-full" />
+              </div>
+              <div>
+                <span className="text-2xl font-black text-zinc-900 tracking-tight block leading-tight">صحتين</span>
+                <span className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase block">مياه نقية طبيعية</span>
+              </div>
+            </Link>
 
-            {/* User Account / Auth Dropdown */}
-            <div className="relative">
-              {user ? (
-                <div className="relative">
-                  <button
-                    onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                    className="flex items-center gap-2 p-2 rounded-xl text-zinc-800 hover:bg-zinc-100 transition border border-zinc-200"
-                  >
-                    <div className="w-8 h-8 bg-zinc-900 text-white rounded-full flex items-center justify-center font-bold text-xs">
-                      {user.name ? user.name.charAt(0) : 'ع'}
-                    </div>
-                    <span className="hidden md:inline text-xs font-bold">{user.name}</span>
-                    <ChevronDown className="w-3.5 h-3.5 text-zinc-500" />
-                  </button>
+            {/* Desktop Navigation Links */}
+            <nav className="hidden lg:flex items-center gap-6 text-sm font-semibold text-zinc-700">
+              <Link 
+                to="/" 
+                className={`transition hover:text-zinc-900 py-2 ${isActive('/') ? 'text-zinc-900 font-bold' : ''}`}
+              >
+                الرئيسية
+              </Link>
+              <Link 
+                to="/products" 
+                className={`transition hover:text-zinc-900 py-2 ${isActive('/products') ? 'text-zinc-900 font-bold' : ''}`}
+              >
+                المنتجات
+              </Link>
+              <Link 
+                to="/individuals" 
+                className={`transition hover:text-zinc-900 py-2 ${isActive('/individuals') ? 'text-zinc-900 font-bold' : ''}`}
+              >
+                الأفراد والعائلات
+              </Link>
+              <Link 
+                to="/b2b" 
+                className={`transition hover:text-zinc-900 py-2 ${isActive('/b2b') ? 'text-zinc-900 font-bold' : ''}`}
+              >
+                الأعمال والضيافة
+              </Link>
+              <Link 
+                to="/charity" 
+                className={`transition hover:text-zinc-900 py-2 ${isActive('/charity') ? 'text-zinc-900 font-bold' : ''}`}
+              >
+                سقيا المساجد والخير
+              </Link>
+              <Link 
+                to="/about" 
+                className={`transition hover:text-zinc-900 py-2 ${isActive('/about') ? 'text-zinc-900 font-bold' : ''}`}
+              >
+                عن صحتين
+              </Link>
+            </nav>
 
-                  {isUserDropdownOpen && (
-                    <div className="absolute left-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-zinc-200 py-2 z-50 animate-fade-in text-sm">
-                      <div className="px-4 py-2 border-b border-zinc-100">
-                        <p className="font-bold text-zinc-900 text-xs">{user.name}</p>
-                        <p className="text-[11px] text-zinc-500 truncate">{user.email}</p>
+            {/* Header Controls */}
+            <div className="flex items-center gap-2">
+              
+              {/* Language Selector */}
+              <button
+                onClick={() => setLang(lang === 'AR' ? 'EN' : 'AR')}
+                className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-lg text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 transition text-xs font-bold border border-zinc-200"
+              >
+                <Globe className="w-4 h-4" />
+                <span>{lang === 'AR' ? 'العربية' : 'English'}</span>
+              </button>
+
+              {/* Search Trigger Button */}
+              <button
+                onClick={() => setIsSearchOpen(true)}
+                className="p-2.5 rounded-lg text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 transition flex items-center justify-center"
+                title="ابحث عن منتج..."
+              >
+                <Search className="w-5 h-5" />
+              </button>
+
+              {/* User Account / Auth Dropdown */}
+              <div className="relative">
+                {user ? (
+                  <div className="relative">
+                    <button
+                      onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                      className="flex items-center gap-2 p-2 rounded-lg text-zinc-800 hover:bg-zinc-100 transition"
+                    >
+                      <div className="w-8 h-8 bg-zinc-900 text-white rounded-full flex items-center justify-center font-bold text-xs">
+                        {user.name ? user.name.charAt(0) : 'ع'}
                       </div>
-                      
-                      {isAdmin && (
+                      <span className="hidden md:inline text-xs font-bold">{user.name}</span>
+                      <ChevronDown className="w-3.5 h-3.5 text-zinc-500" />
+                    </button>
+
+                    {isUserDropdownOpen && (
+                      <div className="absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-zinc-200 py-2 z-50 animate-fade-in text-sm">
+                        <div className="px-4 py-2 border-b border-zinc-100">
+                          <p className="font-bold text-zinc-900 text-xs">{user.name}</p>
+                          <p className="text-[11px] text-zinc-500 truncate">{user.email}</p>
+                        </div>
+                        
+                        {isAdmin && (
+                          <Link
+                            to="/admin"
+                            onClick={() => setIsUserDropdownOpen(false)}
+                            className="block px-4 py-2 text-zinc-900 font-bold hover:bg-zinc-100 transition"
+                          >
+                            لوحة التحكم (الآدمن)
+                          </Link>
+                        )}
+
                         <Link
-                          to="/admin"
+                          to="/account"
                           onClick={() => setIsUserDropdownOpen(false)}
-                          className="block px-4 py-2 text-zinc-900 font-bold hover:bg-zinc-100 transition"
+                          className="block px-4 py-2 text-zinc-700 hover:bg-zinc-50 transition"
                         >
-                          لوحة التحكم (الآدمن)
+                          حسابي الشخصي
                         </Link>
-                      )}
+                        <Link
+                          to="/orders"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                          className="block px-4 py-2 text-zinc-700 hover:bg-zinc-50 transition"
+                        >
+                          طلباتي السابقة
+                        </Link>
+                        <button
+                          onClick={() => {
+                            setIsUserDropdownOpen(false);
+                            logout();
+                          }}
+                          className="w-full text-right px-4 py-2 text-zinc-900 hover:bg-zinc-100 transition flex items-center gap-2 font-bold"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          تسجيل الخروج
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    to="/login"
+                    className="p-2.5 rounded-lg text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 transition flex items-center gap-1.5"
+                    title="تسجيل الدخول"
+                  >
+                    <User className="w-5 h-5" />
+                    <span className="hidden md:inline text-xs font-semibold">دخول</span>
+                  </Link>
+                )}
+              </div>
 
-                      <Link
-                        to="/account"
-                        onClick={() => setIsUserDropdownOpen(false)}
-                        className="block px-4 py-2 text-zinc-700 hover:bg-zinc-50 transition"
-                      >
-                        حسابي الشخصي
-                      </Link>
-                      <Link
-                        to="/orders"
-                        onClick={() => setIsUserDropdownOpen(false)}
-                        className="block px-4 py-2 text-zinc-700 hover:bg-zinc-50 transition"
-                      >
-                        طلباتي السابقة
-                      </Link>
-                      <button
-                        onClick={() => {
-                          setIsUserDropdownOpen(false);
-                          logout();
-                        }}
-                        className="w-full text-right px-4 py-2 text-zinc-900 hover:bg-zinc-100 transition flex items-center gap-2 font-bold"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        تسجيل الخروج
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link
-                  to="/login"
-                  className="p-2.5 rounded-xl text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 transition flex items-center gap-1.5 border border-zinc-200"
-                  title="تسجيل الدخول"
-                >
-                  <User className="w-5 h-5" />
-                  <span className="hidden md:inline text-xs font-semibold">دخول</span>
-                </Link>
-              )}
+              {/* Cart Drawer Trigger Button */}
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="p-2.5 rounded-lg bg-zinc-900 hover:bg-black text-white transition relative flex items-center justify-center"
+                title="سلة المشتريات"
+              >
+                <ShoppingBag className="w-5 h-5" />
+                {totalItemCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-white text-zinc-900 text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-zinc-900">
+                    {totalItemCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Mobile Navigation Toggle Button */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="lg:hidden p-2.5 rounded-lg text-zinc-700 hover:bg-zinc-100 transition"
+              >
+                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+
             </div>
-
-            {/* Cart Drawer Trigger Button */}
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="p-2.5 rounded-xl bg-zinc-900 hover:bg-black text-white transition relative flex items-center justify-center group shadow-sm"
-              title="سلة المشتريات"
-            >
-              <ShoppingBag className="w-5 h-5 group-hover:scale-110 transition" />
-              {totalItemCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-white text-zinc-900 text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-zinc-900 shadow-sm">
-                  {totalItemCount}
-                </span>
-              )}
-            </button>
-
-            {/* Mobile Navigation Toggle Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2.5 rounded-xl text-zinc-700 hover:bg-zinc-100 transition border border-zinc-200"
-            >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-
           </div>
-
         </div>
 
         {/* Mobile Navigation Drawer */}
