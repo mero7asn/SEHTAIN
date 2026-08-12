@@ -42,7 +42,10 @@ export default function Home() {
     <div className="space-y-16 pb-16 bg-white text-zinc-900">
 
       {/* 1. Main Hero Section */}
-      <section className="relative overflow-hidden rounded-3xl mx-6 sm:mx-10 lg:mx-16 mt-6 shadow-lg h-[60vw] sm:h-[50vw] lg:h-[45vw] max-h-[600px]">
+      <section 
+        className="relative overflow-hidden rounded-3xl mx-6 sm:mx-10 lg:mx-16 mt-6 shadow-lg"
+        style={{ height: 'clamp(500px, 42vw, 680px)' }}
+      >
         {/* Full-bleed media */}
         <MediaPlayer
           mediaMode={mainHero.mediaMode || 'single_image'}
@@ -52,25 +55,15 @@ export default function Home() {
           defaultImage="https://images.unsplash.com/photo-1564419320461-6870880221ad?auto=format&fit=crop&w=1600&q=80"
           className="w-full h-full"
         />
-        {/* Text overlay — only shown if title or description is set */}
-        {(mainHero.title || mainHero.description) && (
-          <div className="absolute inset-0 bg-gradient-to-t from-sky-950/70 via-sky-900/20 to-transparent flex flex-col justify-end p-6 sm:p-10 lg:p-14">
-            {mainHero.badge && (
-              <span className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white border border-white/30 px-3 py-1 rounded-full text-xs font-bold mb-3 w-fit">
-                <Droplets className="w-3.5 h-3.5" />
-                {mainHero.badge}
-              </span>
-            )}
-            {mainHero.title && (
-              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white leading-tight mb-2">
-                {mainHero.title}
-              </h1>
-            )}
-            {mainHero.description && (
-              <p className="text-white/80 text-sm sm:text-base max-w-xl">
-                {mainHero.description}
-              </p>
-            )}
+        {/* Minimal CTA — video already contains logo/Arabic text */}
+        {mainHero.ctaText && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
+            <Link
+              to={mainHero.ctaLink || '/products'}
+              className="bg-white/90 backdrop-blur-sm text-zinc-900 px-6 py-2.5 rounded-full text-sm font-bold hover:bg-white transition shadow-lg"
+            >
+              {mainHero.ctaText}
+            </Link>
           </div>
         )}
       </section>
@@ -165,7 +158,7 @@ export default function Home() {
 
       {/* 3. Coming Soon Hero Section */}
       {comingSoonHero.enabled && (
-        <section className="relative overflow-hidden rounded-3xl mx-6 sm:mx-10 lg:mx-16 shadow-lg h-[50vw] max-h-[360px] sm:max-h-[440px]">
+        <section className="relative overflow-hidden rounded-3xl mx-6 sm:mx-10 lg:mx-16 shadow-lg" style={{ height: 'clamp(480px, 40vw, 600px)' }}>
           <MediaPlayer
             mediaMode={comingSoonHero.mediaMode || 'single_image'}
             images={comingSoonHero.images || []}
@@ -174,18 +167,17 @@ export default function Home() {
             defaultImage="https://images.unsplash.com/photo-1564419320461-6870880221ad?auto=format&fit=crop&w=1600&q=80"
             className="w-full h-full"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-sky-950/70 via-sky-900/30 to-transparent flex flex-col justify-center p-6 sm:p-10 lg:p-14">
-            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white border border-white/30 px-3 py-1 rounded-full text-xs font-bold mb-4 w-fit">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{comingSoonHero.badge || 'قريباً جداً'}</span>
+          {/* Minimal CTA — video/image already contains integrated messaging */}
+          {comingSoonHero.ctaText && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
+              <Link
+                to={comingSoonHero.ctaLink || '/products'}
+                className="bg-white/90 backdrop-blur-sm text-zinc-900 px-6 py-2.5 rounded-full text-sm font-bold hover:bg-white transition shadow-lg"
+              >
+                {comingSoonHero.ctaText}
+              </Link>
             </div>
-            <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight mb-3 max-w-lg">
-              {comingSoonHero.title || 'ابتكارات جديدة في عالم المياه'}
-            </h2>
-            <p className="text-white/80 text-sm sm:text-base max-w-md">
-              {comingSoonHero.description || 'نعمل على تطوير منتجات وأحجام جديدة تلبي أرقى معايير الاستدامة والنقاء.'}
-            </p>
-          </div>
+          )}
         </section>
       )}
 
