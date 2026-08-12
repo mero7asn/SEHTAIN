@@ -43,7 +43,7 @@ export default function Home() {
 
       {/* 1. Main Hero Section */}
       <section 
-        className="relative overflow-hidden mx-4 sm:mx-8 lg:mx-16 mt-6"
+        className="relative overflow-hidden mx-2 sm:mx-4 lg:mx-8 mt-6"
         style={{ height: 'clamp(500px, 52vw, 740px)' }}
       >
         {/* Full-bleed media */}
@@ -158,7 +158,7 @@ export default function Home() {
 
       {/* 3. Coming Soon Hero Section */}
       {comingSoonHero.enabled && (
-        <section className="relative overflow-hidden mx-4 sm:mx-8 lg:mx-16 mt-6" style={{ height: 'clamp(480px, 48vw, 660px)' }}>
+        <section className="relative overflow-hidden mx-2 sm:mx-4 lg:mx-8 mt-6" style={{ height: 'clamp(480px, 48vw, 660px)' }}>
           <MediaPlayer
             mediaMode={comingSoonHero.mediaMode || 'single_image'}
             images={comingSoonHero.images || []}
