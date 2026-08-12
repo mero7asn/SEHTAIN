@@ -66,9 +66,9 @@ function MediaUploader({ section, config, setConfig, uploadFiles, onUploadingCha
   const handleUpload = async (e, field, multi) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
-    const oversized = files.filter(f => f.size > 4 * 1024 * 1024);
+    const oversized = files.filter(f => f.size > 3 * 1024 * 1024);
     if (oversized.length) {
-      showToast(`حجم الملف كبير جداً (الحد الأقصى 4MB): ${oversized.map(f => f.name).join(', ')}`, 'error');
+      showToast(`حجم الملف كبير جداً (الحد الأقصى 3MB): ${oversized.map(f => f.name).join(', ')}`, 'error');
       return;
     }
     const localUrls = files.map(f => URL.createObjectURL(f));
@@ -321,19 +321,17 @@ export default function AdminDashboard() {
   // Upload files to backend, return array of URLs
   const uploadFiles = async (files) => {
     if (!files || files.length === 0) return [];
-    const oversized = files.filter(f => f.size > 4 * 1024 * 1024);
+    const oversized = files.filter(f => f.size > 3 * 1024 * 1024);
     if (oversized.length) {
       const names = oversized.map(f => f.name).join(', ');
-      showToast(`حجم الملف كبير جداً (الحد الأقصى 4MB): ${names}`, 'error');
+      showToast(`حجم الملف كبير جداً (الحد الأقصى 3MB): ${names}`, 'error');
       throw new Error('FILE_TOO_LARGE');
     }
     const formData = new FormData();
     for (const file of files) {
       formData.append('files', file);
     }
-    const res = await API.post('/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+    const res = await API.post('/upload', formData);
     return res.data.urls;
   };
 
@@ -590,9 +588,9 @@ export default function AdminDashboard() {
   const handlePartnerLogoUpload = async (e, idx) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
-    const oversized = files.filter(f => f.size > 4 * 1024 * 1024);
+    const oversized = files.filter(f => f.size > 3 * 1024 * 1024);
     if (oversized.length) {
-      showToast(`حجم الملف كبير جداً (الحد الأقصى 4MB): ${oversized.map(f => f.name).join(', ')}`, 'error');
+      showToast(`حجم الملف كبير جداً (الحد الأقصى 3MB): ${oversized.map(f => f.name).join(', ')}`, 'error');
       return;
     }
     const file = files[0];
