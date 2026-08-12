@@ -582,22 +582,19 @@ export default function AdminDashboard() {
       showToast(`حجم الملف كبير جداً (الحد الأقصى 4MB): ${oversized.map(f => f.name).join(', ')}`, 'error');
       return;
     }
-    const localUrl = URL.createObjectURL(files[0]);
-    setSiteConfig(prev => {
-      const updated = [...(prev.partnersSection?.partners || [])];
-      updated[idx] = { ...updated[idx], logo: localUrl };
-      return { ...prev, partnersSection: { ...prev.partnersSection, partners: updated } };
-    });
-    try {
-      const uploaded = await uploadFiles(files);
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result;
       setSiteConfig(prev => {
         const updated = [...(prev.partnersSection?.partners || [])];
-        updated[idx] = { ...updated[idx], logo: uploaded[0] || '' };
+        updated[idx] = { ...updated[idx], logo: base64 };
         return { ...prev, partnersSection: { ...prev.partnersSection, partners: updated } };
       });
-    } catch (err) {
-      showToast('فشل رفع شعار الشريك', 'error');
-    }
+      showToast('تم تحديث شعار الشريك', 'success');
+    };
+    reader.onerror = () => showToast('فشل قراءة الملف', 'error');
+    reader.readAsDataURL(file);
   };
 
   return (
