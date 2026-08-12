@@ -1315,54 +1315,44 @@ export default function AdminDashboard() {
                        </div>
                      </div>
 
-                     <div className="space-y-3">
-                       <div className="flex items-center justify-between">
-                         <span className="font-bold text-slate-800 text-xs">الشركاء الحاليون</span>
-                         <button type="button" onClick={addPartner}
-                           className="px-3 py-2 bg-brand-600 text-white rounded-xl text-xs font-bold hover:bg-brand-700 transition">
-                           + إضافة شريك
-                         </button>
-                       </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-slate-800 text-xs">الشركاء الحاليون</span>
+                          <button type="button" onClick={addPartner}
+                            className="px-3 py-2 bg-brand-600 text-white rounded-xl text-xs font-bold hover:bg-brand-700 transition">
+                            + إضافة شريك
+                          </button>
+                        </div>
 
-                       {(siteConfig.partnersSection?.partners || []).map((partner, idx) => (
-                         <div key={idx} className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                             <div>
-                               <label className="block font-bold text-slate-700 mb-1 text-[11px]">اسم الشريك</label>
-                               <input type="text" value={partner.name || ''}
-                                 onChange={(e) => {
-                                   const updated = [...(siteConfig.partnersSection?.partners || [])];
-                                   updated[idx] = { ...updated[idx], name: e.target.value };
-                                   setSiteConfig({ ...siteConfig, partnersSection: { ...siteConfig.partnersSection, partners: updated } });
-                                 }}
-                                 className="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs" />
-                             </div>
-                             <div>
-                               <label className="block font-bold text-slate-700 mb-1 text-[11px]">رابط الشعار</label>
-                               <input type="text" value={partner.logo || ''}
-                                 onChange={(e) => {
-                                   const updated = [...(siteConfig.partnersSection?.partners || [])];
-                                   updated[idx] = { ...updated[idx], logo: e.target.value };
-                                   setSiteConfig({ ...siteConfig, partnersSection: { ...siteConfig.partnersSection, partners: updated } });
-                                 }}
-                                 className="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs" />
-                               <input key={`partner-upload-${idx}`} type="file" accept="image/*" disabled={uploading}
-                                 onChange={(e) => handlePartnerLogoUpload(e, idx)} className="mt-2 text-[11px]" />
-                             </div>
-                           </div>
-
-                           <div className="flex items-center justify-between">
-                             {partner.logo && (
-                               <img src={partner.logo} alt={partner.name} className="w-12 h-12 object-cover rounded-lg border border-slate-200" />
-                             )}
-                             <button type="button" onClick={() => removePartner(idx)}
-                               className="mr-auto px-3 py-1.5 bg-rose-100 text-rose-700 rounded-lg text-[11px] font-bold hover:bg-rose-200 transition">
-                               حذف الشريك
-                             </button>
-                           </div>
-                         </div>
-                       ))}
-                     </div>
+                        <div className="space-y-2">
+                          {(siteConfig.partnersSection?.partners || []).map((partner, idx) => (
+                            <div key={idx} className="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                              <div className="relative shrink-0">
+                                <img src={partner.logo || 'https://via.placeholder.com/80x80?text=Logo'} alt={partner.name || 'شريك'} className="w-16 h-16 object-cover rounded-xl border border-slate-200 bg-white" />
+                                <label className="absolute -bottom-1 -left-1 cursor-pointer">
+                                  <input type="file" accept="image/*" className="hidden" disabled={uploading}
+                                    onChange={(e) => handlePartnerLogoUpload(e, idx)} />
+                                  <span className="flex items-center justify-center w-5 h-5 bg-brand-600 text-white rounded-full text-[10px] font-bold shadow">📷</span>
+                                </label>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <input type="text" value={partner.name || ''}
+                                  onChange={(e) => {
+                                    const updated = [...(siteConfig.partnersSection?.partners || [])];
+                                    updated[idx] = { ...updated[idx], name: e.target.value };
+                                    setSiteConfig({ ...siteConfig, partnersSection: { ...siteConfig.partnersSection, partners: updated } });
+                                  }}
+                                  placeholder="اسم الشريك"
+                                  className="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs" />
+                              </div>
+                              <button type="button" onClick={() => removePartner(idx)}
+                                className="shrink-0 px-3 py-2 bg-rose-100 text-rose-700 rounded-xl text-[11px] font-bold hover:bg-rose-200 transition">
+                                حذف
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                    </div>
 
                    {/* 5. Footer Components Admin Control */}
