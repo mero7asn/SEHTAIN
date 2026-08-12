@@ -66,6 +66,11 @@ function MediaUploader({ section, config, setConfig, uploadFiles, onUploadingCha
   const handleUpload = async (e, field, multi) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
+    const oversized = files.filter(f => f.size > 4 * 1024 * 1024);
+    if (oversized.length) {
+      showToast(`حجم الملف كبير جداً (الحد الأقصى 4MB): ${oversized.map(f => f.name).join(', ')}`, 'error');
+      return;
+    }
     const localUrls = files.map(f => URL.createObjectURL(f));
     // always store arrays for videos/images, string for introVideo
     setConfig(prev => ({
@@ -303,6 +308,12 @@ export default function AdminDashboard() {
   // Upload files to backend, return array of URLs
   const uploadFiles = async (files) => {
     if (!files || files.length === 0) return [];
+    const oversized = files.filter(f => f.size > 4 * 1024 * 1024);
+    if (oversized.length) {
+      const names = oversized.map(f => f.name).join(', ');
+      showToast(`حجم الملف كبير جداً (الحد الأقصى 4MB): ${names}`, 'error');
+      throw new Error('FILE_TOO_LARGE');
+    }
     const formData = new FormData();
     for (const file of files) {
       formData.append('files', file);
@@ -566,6 +577,11 @@ export default function AdminDashboard() {
   const handlePartnerLogoUpload = async (e, idx) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
+    const oversized = files.filter(f => f.size > 4 * 1024 * 1024);
+    if (oversized.length) {
+      showToast(`حجم الملف كبير جداً (الحد الأقصى 4MB): ${oversized.map(f => f.name).join(', ')}`, 'error');
+      return;
+    }
     const localUrl = URL.createObjectURL(files[0]);
     setSiteConfig(prev => {
       const updated = [...(prev.partnersSection?.partners || [])];
@@ -1330,7 +1346,7 @@ export default function AdminDashboard() {
                               <div className="relative shrink-0">
                                 <img src={partner.logo || 'https://via.placeholder.com/80x80?text=Logo'} alt={partner.name || 'شريك'} className="w-16 h-16 object-cover rounded-xl border border-slate-200 bg-white" />
                                 <label className="absolute -bottom-1 -left-1 cursor-pointer">
-                                  <input type="file" accept="image/*" className="hidden" disabled={uploading}
+                                  <input type="file" accept="image/*" className="hidden" disabled={isMediaUploading}
                                     onChange={(e) => handlePartnerLogoUpload(e, idx)} />
                                   <span className="flex items-center justify-center w-5 h-5 bg-brand-600 text-white rounded-full text-[10px] font-bold shadow">📷</span>
                                 </label>

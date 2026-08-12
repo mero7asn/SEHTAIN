@@ -21,6 +21,9 @@ router.post('/', protect, upload.array('files', 10), async (req, res) => {
       if (isVideo && !['.mp4', '.webm', '.ogg'].includes(ext)) {
         return res.status(400).json({ message: `صيغة الفيديو غير مدعومة: ${ext}. يرجى رفع ملف MP4 بترميز H.264/AAC.` });
       }
+      if (file.size > 4 * 1024 * 1024) {
+        return res.status(413).json({ message: `حجم الملف كبير جداً: ${(file.size / 1024 / 1024).toFixed(1)}MB. الحد الأقصى هو 4MB.` });
+      }
     }
 
     const urls = await Promise.all(
