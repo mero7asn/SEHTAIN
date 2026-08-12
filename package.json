@@ -1,7 +1,0 @@
-{
-  "name": "sehtain",
-  "private": true,
-  "scripts": {
-    "build": "cd frontend && npm install && npm run build"
-  }
-}
