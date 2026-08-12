@@ -12,24 +12,32 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
     const fetchData = async () => {
       try {
         const [configRes, prodRes] = await Promise.all([
           API.get('/config'),
           API.get('/products')
         ]);
+        if (!mounted) return;
         setConfig(configRes.data);
 
         const allProds = prodRes.data || [];
         setActiveProducts(allProds.filter(p => !p.isComingSoon));
         setComingSoonProducts(allProds.filter(p => p.isComingSoon));
       } catch (err) {
+        if (!mounted) return;
         console.error('Failed to load home page data:', err);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
     fetchData();
+    const interval = setInterval(fetchData, 5000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const mainHero = config?.mainHero || {};
