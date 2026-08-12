@@ -34,6 +34,7 @@ export const registerUser = async (req, res) => {
       email: user.email,
       phone: user.phone,
       role: user.role,
+      addresses: user.addresses || [],
       token: generateToken(user._id)
     });
   } catch (error) {
@@ -53,6 +54,7 @@ export const loginUser = async (req, res) => {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        addresses: user.addresses || [],
         token: generateToken(user._id)
       });
     } else {

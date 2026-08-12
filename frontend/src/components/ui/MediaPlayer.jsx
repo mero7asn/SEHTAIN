@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 
 export default function MediaPlayer({
@@ -20,6 +20,20 @@ export default function MediaPlayer({
   const videoRef = useRef(null);
   const fitClass = objectFit === 'contain' ? 'object-contain' : 'object-cover';
 
+  const currentVideoSrc = useMemo(() => {
+    if (mediaMode === 'two_videos') {
+      const introSrc = (Array.isArray(introVideo) ? introVideo[0] : introVideo) || videos[0];
+      return twoVideosPhase === 'intro' ? introSrc : (videos[1] || videos[0] || introSrc);
+    }
+    if (mediaMode === 'single_video') {
+      return videos[0] || introVideo;
+    }
+    if (mediaMode === 'loop_videos') {
+      return videos[currentIdx % videos.length];
+    }
+    return null;
+  }, [mediaMode, videos, introVideo, twoVideosPhase, currentIdx]);
+
   useEffect(() => {
     setPlayError(false);
     setTwoVideosPhase('intro');
@@ -31,11 +45,38 @@ export default function MediaPlayer({
     setPlayError(false);
     const playPromise = videoEl.play();
     if (playPromise) {
-      playPromise.catch(() => {
+      playPromise.catch((err) => {
+        console.warn('[MediaPlayer] Autoplay blocked or play failed:', err);
         setPlayError(true);
       });
     }
   };
+
+  useEffect(() => {
+    if (mediaMode === 'single_image' || !currentVideoSrc) return;
+    const video = videoRef.current;
+    if (!video) return;
+
+    const tryPlay = () => {
+      console.log('[MediaPlayer] Attempting play for:', currentVideoSrc, 'readyState:', video.readyState);
+      attemptPlay(video);
+    };
+
+    tryPlay();
+    video.addEventListener('canplay', tryPlay);
+
+    const timeout = setTimeout(() => {
+      if (video.readyState === 0) {
+        console.warn('[MediaPlayer] Video load timeout:', currentVideoSrc);
+        setPlayError(true);
+      }
+    }, 5000);
+
+    return () => {
+      video.removeEventListener('canplay', tryPlay);
+      clearTimeout(timeout);
+    };
+  }, [mediaMode, currentVideoSrc]);
 
   useEffect(() => {
     let timer;
@@ -100,8 +141,7 @@ export default function MediaPlayer({
   }
 
   if (mediaMode === 'single_video') {
-    const videoSrc = videos[0] || introVideo;
-    if (!videoSrc) {
+    if (!currentVideoSrc) {
       return (
         <div className={`absolute inset-0 overflow-hidden ${className}`}>
           <img src={defaultImage} alt="" className={`w-full h-full ${fitClass} block`} />
@@ -112,7 +152,7 @@ export default function MediaPlayer({
       <div className={`absolute inset-0 overflow-hidden bg-white ${className}`}>
         <video
           ref={videoRef}
-          src={videoSrc}
+          src={currentVideoSrc}
           autoPlay
           loop
           muted

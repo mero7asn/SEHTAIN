@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { CreditCard, Banknote, Smartphone, ShieldCheck, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -12,19 +12,33 @@ export default function Checkout() {
   const { showToast } = useToast();
   const navigate = useNavigate();
 
-  const [fullName, setFullName] = useState(user ? user.name : '');
-  const [phone, setPhone] = useState(user ? user.phone : '');
-  const [email, setEmail] = useState(user ? user.email : '');
-
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [city, setCity] = useState('الرياض');
   const [district, setDistrict] = useState('');
   const [street, setStreet] = useState('');
   const [building, setBuilding] = useState('');
   const [apartment, setApartment] = useState('');
   const [notes, setNotes] = useState('');
-
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    setFullName(user.name || '');
+    setPhone(user.phone || '');
+    setEmail(user.email || '');
+
+    const defaultAddr = (user.addresses || []).find(a => a.isDefault) || (user.addresses || [])[0];
+    if (defaultAddr) {
+      setCity(defaultAddr.city || 'الرياض');
+      setDistrict(defaultAddr.district || '');
+      setStreet(defaultAddr.street || '');
+      setBuilding(defaultAddr.building || '');
+      setApartment(defaultAddr.apartment || '');
+    }
+  }, [user]);
 
   if (cart.length === 0) {
     return (
