@@ -57,6 +57,7 @@ function MediaUploader({ section, config, setConfig, uploadFiles, onUploadingCha
   const [uploading, setUploading] = useState(false);
   const sec = config[section] || {};
   const mode = sec.mediaMode || 'single_image';
+  const { showToast } = useToast();
 
   const setMode = (m) => setConfig(prev => ({ ...prev, [section]: { ...prev[section], mediaMode: m } }));
 
