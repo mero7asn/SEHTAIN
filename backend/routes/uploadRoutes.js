@@ -7,7 +7,6 @@ import { protect } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 router.post('/', protect, async (req, res) => {
-  // Stream multipart upload to Vercel Blob using Busboy to avoid buffering large files in memory
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return res.status(500).json({ message: 'BLOB_READ_WRITE_TOKEN غير مضبوط في بيئة الخادم' });
   }
@@ -17,11 +16,17 @@ router.post('/', protect, async (req, res) => {
     const uploadedUrls = [];
     let aborted = false;
 
+    bb.on('filesLimit', () => console.warn('[/api/upload] Busboy filesLimit reached'));
+    bb.on('fieldsLimit', () => console.warn('[/api/upload] Busboy fieldsLimit reached'));
+    bb.on('partsLimit', () => console.warn('[/api/upload] Busboy partsLimit reached'));
+
     bb.on('file', (fieldname, fileStream, filename, encoding, mimetype) => {
       if (aborted) {
         fileStream.resume();
         return;
       }
+
+      fileStream.on('limit', () => console.warn('[/api/upload] file stream emitted limit event for', filename));
 
       const ext = path.extname(filename).toLowerCase();
       const isVideo = mimetype && mimetype.startsWith('video/');
@@ -32,10 +37,8 @@ router.post('/', protect, async (req, res) => {
         return;
       }
 
-      // Use a safe filename
       const filenameOnBlob = `${Date.now()}-${Math.round(Math.random() * 1e6)}${ext}`;
 
-      // Stream directly to Vercel Blob. put() accepts stream or buffer in recent versions.
       const uploadPromise = put(filenameOnBlob, fileStream, {
         access: 'public',
         contentType: mimetype,
@@ -53,7 +56,6 @@ router.post('/', protect, async (req, res) => {
     bb.on('error', (err) => {
       console.error('Upload stream error:', err);
       if (!res.headersSent) {
-        // Map known cases
         if (err.message && err.message.includes('صيغة الفيديو غير مدعومة')) {
           return res.status(400).json({ message: err.message });
         }
@@ -67,9 +69,6 @@ router.post('/', protect, async (req, res) => {
     bb.on('finish', async () => {
       if (aborted) return;
       try {
-        // Wait briefly for any ongoing uploads to resolve
-        // Note: put() promises were stored implicitly by pushing to uploadedUrls via their then()
-        // There is a race—ensure any pending operations finish by small delay
         await new Promise((r) => setTimeout(r, 200));
         return res.json({ urls: uploadedUrls });
       } catch (err) {

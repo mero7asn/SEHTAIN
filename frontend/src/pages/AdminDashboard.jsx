@@ -89,7 +89,7 @@ function MediaUploader({ section, config, setConfig, uploadFiles, onUploadingCha
     try {
       const uploaded = await uploadFiles(files, (percent) => {
         showToast(`Uploading... ${percent}%`, 'info');
-      });
+      }, { purpose: 'hero' });
 
       const uploadedUrls = uploaded.map((url) => {
         if (typeof url === 'string') return url;
@@ -379,7 +379,7 @@ export default function AdminDashboard() {
   }
 
   // Upload files to backend, return array of URLs
-  const uploadFiles = async (files, onProgress) => {
+  const uploadFiles = async (files, onProgress, options = {}) => {
     if (!files || files.length === 0) return [];
     const MAX = 100 * 1024 * 1024; // 100 MB
     const oversized = files.filter(f => f.size > MAX);
@@ -394,26 +394,86 @@ export default function AdminDashboard() {
       showToast(`${f.name}: ${(f.size / 1024 / 1024).toFixed(2)} MB`, 'info');
     }
 
-    const formData = new FormData();
+    // Prefer direct client -> Vercel Blob upload for Hero videos to avoid serverless size limits.
+    const results = [];
+    const purpose = options.purpose || null;
     for (const file of files) {
-      formData.append('files', file);
+      const isVideo = file.type && file.type.startsWith('video/');
+      if (isVideo && purpose === 'hero') {
+        const presignRes = await API.post('/blob/presign', {
+          filename: file.name,
+          contentType: file.type,
+          size: file.size,
+          purpose: 'hero'
+        });
+
+        const { presignedUrl, blobUrl } = presignRes.data;
+        if (!presignedUrl || !blobUrl) throw new Error('فشل في إنشاء رابط الرفع المباشر');
+
+        await new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open('PUT', presignedUrl);
+          xhr.setRequestHeader('Content-Type', file.type);
+          xhr.upload.addEventListener('progress', (e) => {
+            if (onProgress && e.total) onProgress(Math.round((e.loaded / e.total) * 100));
+          });
+          xhr.addEventListener('load', () => {
+            if (xhr.status >= 200 && xhr.status < 300) resolve();
+            else reject(new Error(`فشل الرفع المباشر: ${xhr.status}`));
+          });
+          xhr.addEventListener('error', () => reject(new Error('فشل الرفع المباشر')));
+          xhr.send(file);
+        });
+
+        results.push(blobUrl);
+        continue;
+      }
+
+      // Non-hero videos and non-video files are collected for multipart fallback
+      results.push(file);
     }
 
-    // Use axios progress reporting if available
-    const res = await API.post('/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      onUploadProgress: (e) => {
-        if (onProgress && e.total) {
-          const percent = Math.round((e.loaded / e.total) * 100);
-          onProgress(percent);
-        }
-      }
-    });
+    // If any entries in results are File objects, we must send them via multipart to the server
+    const filesToSend = results.filter(r => r instanceof File);
+    // Prevent sending large files through our serverless multipart endpoint which is limited (~50MB).
+    const PLATFORM_MULTIPART_LIMIT = 50 * 1024 * 1024; // 50 MB
+    const tooLarge = filesToSend.filter(f => f.size > PLATFORM_MULTIPART_LIMIT);
+    if (tooLarge.length) {
+      const names = tooLarge.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(2)} MB)`).join(', ');
+      showToast(`Some files are too large to send via server upload: ${names}. Use the hero upload or upload smaller files.`, 'error');
+      throw new Error('MULTIPART_FILE_TOO_LARGE');
+    }
+    const urlsFromServer = [];
+    if (filesToSend.length) {
+      const formData = new FormData();
+      for (const f of filesToSend) formData.append('files', f);
 
-    const rawUrls = Array.isArray(res?.data?.urls) ? res.data.urls : Array.isArray(res?.data) ? res.data : [];
-    return rawUrls
-      .map((url) => typeof url === 'string' ? url : url?.url || '')
-      .filter(Boolean);
+      const res = await API.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (e) => {
+          if (onProgress && e.total) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            onProgress(percent);
+          }
+        }
+      });
+
+      const rawUrls = Array.isArray(res?.data?.urls) ? res.data.urls : Array.isArray(res?.data) ? res.data : [];
+      urlsFromServer.push(...rawUrls.map(u => typeof u === 'string' ? u : u?.url || '').filter(Boolean));
+    }
+
+    // Merge results: replace File objects with returned server URLs in order
+    const final = [];
+    let serverIndex = 0;
+    for (const r of results) {
+      if (r instanceof File) {
+        final.push(urlsFromServer[serverIndex++] || '');
+      } else {
+        final.push(r);
+      }
+    }
+
+    return final.filter(Boolean);
   };
 
   // Handle Product Create / Update

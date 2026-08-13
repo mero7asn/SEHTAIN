@@ -14,6 +14,7 @@ import charityRoutes from './routes/charityRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import statsRoutes from './routes/statsRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import blobRoutes from './routes/blobRoutes.js';
 import siteConfigRoutes from './routes/siteConfigRoutes.js';
 
 dotenv.config();
@@ -48,6 +49,7 @@ app.use('/api/charity', charityRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/blob', blobRoutes);
 app.use('/api/config', siteConfigRoutes);
 
 app.use(notFound);
