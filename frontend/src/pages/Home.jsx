@@ -5,11 +5,29 @@ import API from '../services/api';
 import ProductGrid from '../components/product/ProductGrid';
 import MediaPlayer from '../components/ui/MediaPlayer';
 
+const sanitizeConfigForClient = (value) => {
+  if (typeof value === 'string') {
+    return value.startsWith('blob:') ? '' : value;
+  }
+  if (Array.isArray(value)) {
+    return value.map(item => sanitizeConfigForClient(item)).filter(item => !(typeof item === 'string' && item === ''));
+  }
+  if (value && typeof value === 'object') {
+    const cleaned = {};
+    Object.keys(value).forEach((key) => {
+      cleaned[key] = sanitizeConfigForClient(value[key]);
+    });
+    return cleaned;
+  }
+  return value;
+};
+
 export default function Home() {
   const [config, setConfig] = useState(() => {
     try {
       const local = localStorage.getItem('sahtain_site_config');
-      return local ? JSON.parse(local) : null;
+      const parsed = local ? JSON.parse(local) : null;
+      return parsed ? sanitizeConfigForClient(parsed) : null;
     } catch {
       return null;
     }
@@ -27,7 +45,7 @@ export default function Home() {
           API.get('/products')
         ]);
         if (!mounted) return;
-        const cfg = configRes.data;
+        const cfg = sanitizeConfigForClient(configRes.data);
         localStorage.setItem('sahtain_site_config', JSON.stringify(cfg));
         setConfig(cfg);
 
@@ -46,8 +64,8 @@ export default function Home() {
     const handleStorage = (e) => {
       if (e.key === 'sahtain_site_config' && e.newValue) {
         try {
-          setConfig(JSON.parse(e.newValue));
-        } catch {}
+          setConfig(sanitizeConfigForClient(JSON.parse(e.newValue)));
+        } catch { }
       }
     };
     window.addEventListener('storage', handleStorage);
@@ -68,7 +86,7 @@ export default function Home() {
     <div className="space-y-16 pb-16 bg-white text-zinc-900">
 
       {/* 1. Main Hero Section */}
-      <section 
+      <section
         className="relative overflow-hidden mx-2 sm:mx-4 lg:mx-8 mt-6 min-h-[500px] lg:min-h-[650px] xl:min-h-[700px]"
       >
         {/* Full-bleed media */}
@@ -96,7 +114,7 @@ export default function Home() {
       {/* Quick Solutions Grid (Pristine White Cards) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          
+
           <div className="bg-white rounded-3xl p-8 border border-zinc-200 shadow-2xs hover:shadow-md transition duration-300 flex flex-col justify-between group">
             <div className="space-y-4">
               <div className="w-14 h-14 bg-zinc-100 text-zinc-900 rounded-2xl flex items-center justify-center border border-zinc-200 group-hover:bg-zinc-900 group-hover:text-white transition duration-300">
@@ -160,7 +178,7 @@ export default function Home() {
           <div className="space-y-1">
             <span className="text-zinc-500 font-bold text-xs uppercase tracking-wider">{productsSec.badge || 'تشكيلتنا المختارة'}</span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900">{productsSec.title || 'منتجاتنا الحالية'}</h2>
-            
+
             <p className="text-zinc-600 text-sm font-medium leading-relaxed">
               {productsSec.line1 || 'اختر الحجم المناسب لاحتياجك اليومي من عبوات مياه صحتين المتميزة.'}
             </p>
@@ -215,7 +233,7 @@ export default function Home() {
               <span>{comingSoonSec.badge || 'منتجات قادمة'}</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900">{comingSoonSec.title || 'قريباً في صحتين'}</h2>
-            
+
             <p className="text-zinc-600 text-sm font-medium leading-relaxed">
               {comingSoonSec.line1 || 'تشكيلة حصريّة جاري تجهيزها لتنضم إلى عائلة منتجاتنا في القريب العاجل.'}
             </p>
@@ -248,13 +266,13 @@ export default function Home() {
             {(partnersSec.partners && partnersSec.partners.length > 0
               ? partnersSec.partners
               : [
-                  { name: 'فندق النخيل الذهبي', logo: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=200&q=80' },
-                  { name: 'مستشفى الشفاء التخصصي', logo: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=200&q=80' },
-                  { name: 'سلسلة مطاعم غولدن', logo: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=200&q=80' },
-                  { name: 'جمعية إطعام الخيرية', logo: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=200&q=80' },
-                  { name: 'مدارس الرواد العالمية', logo: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=200&q=80' },
-                  { name: 'منتجع الساحل', logo: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=200&q=80' }
-                ]
+                { name: 'فندق النخيل الذهبي', logo: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=200&q=80' },
+                { name: 'مستشفى الشفاء التخصصي', logo: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=200&q=80' },
+                { name: 'سلسلة مطاعم غولدن', logo: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=200&q=80' },
+                { name: 'جمعية إطعام الخيرية', logo: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=200&q=80' },
+                { name: 'مدارس الرواد العالمية', logo: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=200&q=80' },
+                { name: 'منتجع الساحل', logo: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=200&q=80' }
+              ]
             ).map((partner, idx) => (
               <div key={idx} className="bg-white p-4 rounded-2xl border border-zinc-200 flex items-center justify-center hover:shadow-md transition">
                 <img src={partner.logo} alt={partner.name} className="h-16 sm:h-20 w-auto object-contain" />

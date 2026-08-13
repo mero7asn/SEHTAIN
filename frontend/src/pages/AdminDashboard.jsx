@@ -88,15 +88,51 @@ function MediaUploader({ section, config, setConfig, uploadFiles, onUploadingCha
     onUploadingChange?.(true);
     try {
       const uploaded = await uploadFiles(files, (percent) => {
-        // report progress via toast (lightweight)
         showToast(`Uploading... ${percent}%`, 'info');
       });
+
+      const uploadedUrls = uploaded.map((url) => {
+        if (typeof url === 'string') return url;
+        if (url && typeof url === 'object') return url.url || '';
+        return '';
+      }).filter(Boolean);
+
+      const replacements = new Map(localUrls.map((localUrl, index) => [localUrl, uploadedUrls[index] || '']));
+
       setConfig(prev => {
+        const current = isArrayField(field)
+          ? (Array.isArray(prev[section][field]) ? prev[section][field] : [])
+          : [prev[section][field]].filter(Boolean);
+
+        const cleanedCurrent = current
+          .map(value => replacements.get(value) || value)
+          .filter(value => typeof value === 'string' ? !value.startsWith('blob:') : true);
+
         if (isArrayField(field)) {
-          const current = Array.isArray(prev[section][field]) ? prev[section][field] : [];
-          return { ...prev, [section]: { ...prev[section], [field]: [...current.filter(u => !localUrls.includes(u)), ...uploaded] } };
+          return {
+            ...prev,
+            [section]: {
+              ...prev[section],
+              [field]: [...cleanedCurrent.filter(v => !localUrls.includes(v)), ...uploadedUrls.filter(u => !u.startsWith('blob:'))]
+            }
+          };
         }
-        return { ...prev, [section]: { ...prev[section], [field]: uploaded[0] } };
+
+        return {
+          ...prev,
+          [section]: {
+            ...prev[section],
+            [field]: uploadedUrls[0] || ''
+          }
+        };
+      });
+
+      localUrls.forEach((localUrl) => {
+        try {
+          URL.revokeObjectURL(localUrl);
+        } catch (err) {
+          // no-op
+        }
       });
     } finally {
       setUploading(false);
@@ -211,10 +247,30 @@ export default function AdminDashboard() {
   const [b2bRequests, setB2bRequests] = useState([]);
   const [charityRequests, setCharityRequests] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const sanitizePersistedConfig = (value) => {
+    if (typeof value === 'string') {
+      return value.startsWith('blob:') ? '' : value;
+    }
+    if (Array.isArray(value)) {
+      return value
+        .map(item => sanitizePersistedConfig(item))
+        .filter(item => !(typeof item === 'string' && item === ''));
+    }
+    if (value && typeof value === 'object') {
+      const cleaned = {};
+      Object.keys(value).forEach((key) => {
+        cleaned[key] = sanitizePersistedConfig(value[key]);
+      });
+      return cleaned;
+    }
+    return value;
+  };
+
   const [siteConfig, setSiteConfig] = useState(() => {
     try {
       const local = localStorage.getItem('sahtain_site_config');
-      return local ? JSON.parse(local) : null;
+      const parsed = local ? JSON.parse(local) : null;
+      return parsed ? sanitizePersistedConfig(parsed) : null;
     } catch {
       return null;
     }
@@ -278,7 +334,7 @@ export default function AdminDashboard() {
       setB2bRequests(b2bRes.data);
       setCharityRequests(charityRes.data);
       setReviews(revRes.data);
-      setSiteConfig(configRes.data);
+      setSiteConfig(sanitizePersistedConfig(configRes.data));
       setLastUpdatedTime(new Date());
     } catch (err) {
       console.error(err);
@@ -353,7 +409,11 @@ export default function AdminDashboard() {
         }
       }
     });
-    return res.data.urls;
+
+    const rawUrls = Array.isArray(res?.data?.urls) ? res.data.urls : Array.isArray(res?.data) ? res.data : [];
+    return rawUrls
+      .map((url) => typeof url === 'string' ? url : url?.url || '')
+      .filter(Boolean);
   };
 
   // Handle Product Create / Update
@@ -1122,9 +1182,11 @@ export default function AdminDashboard() {
                 </div>
                 <button
                   onClick={async () => {
-                    localStorage.setItem('sahtain_site_config', JSON.stringify(siteConfig));
+                    const sanitized = sanitizePersistedConfig(siteConfig);
+                    localStorage.setItem('sahtain_site_config', JSON.stringify(sanitized));
                     try {
-                      await API.put('/config', siteConfig);
+                      await API.put('/config', sanitized);
+                      setSiteConfig(sanitized);
                       showToast('تم حفظ جميع إعدادات الموقع بنجاح', 'success');
                       fetchData(true);
                     } catch (err) {
