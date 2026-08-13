@@ -5,6 +5,11 @@ import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
+const normalizeBlobUrl = (value) => {
+  if (typeof value !== 'string') return value;
+  return value.replace(/^https?:\/\/store_/i, 'https://');
+};
+
 router.post('/presign', protect, async (req, res) => {
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return res.status(500).json({ message: 'BLOB_READ_WRITE_TOKEN غير مضبوط في بيئة الخادم' });
@@ -51,10 +56,11 @@ router.post('/presign', protect, async (req, res) => {
       }
     );
 
-    const storeId = process.env.BLOB_STORE_ID || parseStoreIdFromPresignedUrl(presignedUrl);
+    const rawStoreId = process.env.BLOB_STORE_ID || parseStoreIdFromPresignedUrl(presignedUrl);
+    const storeId = typeof rawStoreId === 'string' ? rawStoreId.replace(/^store_/, '').trim() : '';
     const blobUrl = storeId
-      ? `https://${storeId}.public.blob.vercel-storage.com/${pathname}`
-      : presignedUrl;
+      ? normalizeBlobUrl(`https://${storeId}.public.blob.vercel-storage.com/${pathname}`)
+      : normalizeBlobUrl(presignedUrl);
 
     return res.json({ presignedUrl, pathname, blobUrl });
   } catch (err) {

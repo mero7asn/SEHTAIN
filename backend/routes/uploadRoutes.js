@@ -6,6 +6,11 @@ import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
+const normalizeBlobUrl = (value) => {
+  if (typeof value !== 'string') return value;
+  return value.replace(/^https?:\/\/store_/i, 'https://');
+};
+
 router.post('/', protect, async (req, res) => {
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return res.status(500).json({ message: 'BLOB_READ_WRITE_TOKEN غير مضبوط في بيئة الخادم' });
@@ -44,7 +49,7 @@ router.post('/', protect, async (req, res) => {
         contentType: mimetype,
         token: process.env.BLOB_READ_WRITE_TOKEN,
       }).then((blob) => {
-        uploadedUrls.push(blob.url);
+        uploadedUrls.push(normalizeBlobUrl(blob?.url));
       });
 
       uploadPromise.catch((err) => {

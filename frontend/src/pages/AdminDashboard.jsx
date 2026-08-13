@@ -92,8 +92,8 @@ function MediaUploader({ section, config, setConfig, uploadFiles, onUploadingCha
       }, { purpose: 'hero' });
 
       const uploadedUrls = uploaded.map((url) => {
-        if (typeof url === 'string') return url;
-        if (url && typeof url === 'object') return url.url || '';
+        if (typeof url === 'string') return normalizeBlobUrl(url);
+        if (url && typeof url === 'object') return normalizeBlobUrl(url.url || '');
         return '';
       }).filter(Boolean);
 
@@ -247,9 +247,19 @@ export default function AdminDashboard() {
   const [b2bRequests, setB2bRequests] = useState([]);
   const [charityRequests, setCharityRequests] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const normalizeBlobUrl = (value) => {
+    if (typeof value !== 'string') return value;
+    return value.replace(/^https?:\/\/store_/i, 'https://');
+  };
+
   const sanitizePersistedConfig = (value) => {
     if (typeof value === 'string') {
-      return value.startsWith('blob:') ? '' : value;
+      const compact = value.trim();
+      if (compact.startsWith('blob:')) return '';
+      if (/^https?:\/\/store_[^/]+\.public\.blob\.vercel-storage\.com\//i.test(compact)) {
+        return normalizeBlobUrl(compact);
+      }
+      return compact;
     }
     if (Array.isArray(value)) {
       return value
@@ -459,7 +469,10 @@ export default function AdminDashboard() {
       });
 
       const rawUrls = Array.isArray(res?.data?.urls) ? res.data.urls : Array.isArray(res?.data) ? res.data : [];
-      urlsFromServer.push(...rawUrls.map(u => typeof u === 'string' ? u : u?.url || '').filter(Boolean));
+      urlsFromServer.push(...rawUrls.map(u => {
+        const url = typeof u === 'string' ? u : u?.url || '';
+        return normalizeBlobUrl(url);
+      }).filter(Boolean));
     }
 
     // Merge results: replace File objects with returned server URLs in order
