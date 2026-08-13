@@ -52,6 +52,11 @@ const paymentArabicDisplay = {
   stcpay: 'stcpay'
 };
 
+const normalizeBlobUrl = (value) => {
+  if (typeof value !== 'string') return value;
+  return value.replace(/^https?:\/\/store_/i, 'https://');
+};
+
 // Reusable media uploader for site config sections (mainHero, comingSoonHero)
 function MediaUploader({ section, config, setConfig, uploadFiles, onUploadingChange }) {
   const [uploading, setUploading] = useState(false);
@@ -247,10 +252,6 @@ export default function AdminDashboard() {
   const [b2bRequests, setB2bRequests] = useState([]);
   const [charityRequests, setCharityRequests] = useState([]);
   const [reviews, setReviews] = useState([]);
-  const normalizeBlobUrl = (value) => {
-    if (typeof value !== 'string') return value;
-    return value.replace(/^https?:\/\/store_/i, 'https://');
-  };
 
   const sanitizePersistedConfig = (value) => {
     if (typeof value === 'string') {
