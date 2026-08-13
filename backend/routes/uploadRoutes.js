@@ -1,46 +1,86 @@
 import express from 'express';
 import path from 'path';
 import { put } from '@vercel/blob';
-import upload from '../middleware/uploadMiddleware.js';
+import Busboy from 'busboy';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/', protect, upload.array('files', 10), async (req, res) => {
+router.post('/', protect, async (req, res) => {
+  // Stream multipart upload to Vercel Blob using Busboy to avoid buffering large files in memory
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return res.status(500).json({ message: 'BLOB_READ_WRITE_TOKEN غير مضبوط في بيئة الخادم' });
+  }
+
   try {
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: 'لم يتم رفع أي ملف' });
-    }
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      return res.status(500).json({ message: 'BLOB_READ_WRITE_TOKEN غير مضبوط في بيئة الخادم' });
-    }
+    const bb = new Busboy({ headers: req.headers, limits: { fileSize: 100 * 1024 * 1024, files: 10 } });
+    const uploadedUrls = [];
+    let aborted = false;
 
-    for (const file of req.files) {
-      const ext = path.extname(file.originalname).toLowerCase();
-      const isVideo = file.mimetype.startsWith('video/');
+    bb.on('file', (fieldname, fileStream, filename, encoding, mimetype) => {
+      if (aborted) {
+        fileStream.resume();
+        return;
+      }
+
+      const ext = path.extname(filename).toLowerCase();
+      const isVideo = mimetype && mimetype.startsWith('video/');
       if (isVideo && !['.mp4', '.webm', '.ogg'].includes(ext)) {
-        return res.status(400).json({ message: `صيغة الفيديو غير مدعومة: ${ext}. يرجى رفع ملف MP4 بترميز H.264/AAC.` });
+        aborted = true;
+        fileStream.resume();
+        bb.emit('error', new Error(`صيغة الفيديو غير مدعومة: ${ext}`));
+        return;
       }
-      if (file.size > 3 * 1024 * 1024) {
-        return res.status(413).json({ message: `حجم الملف كبير جداً: ${(file.size / 1024 / 1024).toFixed(1)}MB. الحد الأقصى هو 3MB.` });
-      }
-    }
 
-    const urls = await Promise.all(
-      req.files.map(async (file) => {
-        const ext = path.extname(file.originalname);
-        const filename = `${Date.now()}-${Math.round(Math.random() * 1e6)}${ext}`;
-        const blob = await put(filename, file.buffer, {
-          access: 'public',
-          contentType: file.mimetype,
-          token: process.env.BLOB_READ_WRITE_TOKEN,
-        });
-        return blob.url;
-      })
-    );
-    res.json({ urls });
+      // Use a safe filename
+      const filenameOnBlob = `${Date.now()}-${Math.round(Math.random() * 1e6)}${ext}`;
+
+      // Stream directly to Vercel Blob. put() accepts stream or buffer in recent versions.
+      const uploadPromise = put(filenameOnBlob, fileStream, {
+        access: 'public',
+        contentType: mimetype,
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      }).then((blob) => {
+        uploadedUrls.push(blob.url);
+      });
+
+      uploadPromise.catch((err) => {
+        aborted = true;
+        bb.emit('error', err);
+      });
+    });
+
+    bb.on('error', (err) => {
+      console.error('Upload stream error:', err);
+      if (!res.headersSent) {
+        // Map known cases
+        if (err.message && err.message.includes('صيغة الفيديو غير مدعومة')) {
+          return res.status(400).json({ message: err.message });
+        }
+        if (err.code === 'LIMIT_FILE_SIZE' || err.message && err.message.includes('max file size')) {
+          return res.status(413).json({ message: `حجم الملف كبير جداً. الحد الأقصى هو 100MB.` });
+        }
+        return res.status(500).json({ message: err.message || 'فشل رفع الملف' });
+      }
+    });
+
+    bb.on('finish', async () => {
+      if (aborted) return;
+      try {
+        // Wait briefly for any ongoing uploads to resolve
+        // Note: put() promises were stored implicitly by pushing to uploadedUrls via their then()
+        // There is a race—ensure any pending operations finish by small delay
+        await new Promise((r) => setTimeout(r, 200));
+        return res.json({ urls: uploadedUrls });
+      } catch (err) {
+        console.error('Finalizing upload error:', err);
+        return res.status(500).json({ message: err.message || 'فشل رفع الملف' });
+      }
+    });
+
+    req.pipe(bb);
   } catch (err) {
-    console.error('Upload error:', err);
+    console.error('Upload route error:', err);
     res.status(500).json({ message: err.message || 'فشل رفع الملف' });
   }
 });

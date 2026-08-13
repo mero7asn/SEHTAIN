@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingBag, 
-  Users, 
-  Building2, 
-  HeartHandshake, 
-  Star, 
-  Plus, 
-  Edit, 
-  Trash2, 
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingBag,
+  Users,
+  Building2,
+  HeartHandshake,
+  Star,
+  Plus,
+  Edit,
+  Trash2,
   RefreshCw,
   Radio,
   Check,
@@ -67,9 +67,10 @@ function MediaUploader({ section, config, setConfig, uploadFiles, onUploadingCha
   const handleUpload = async (e, field, multi) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
-    const oversized = files.filter(f => f.size > 3 * 1024 * 1024);
+    const MAX = 100 * 1024 * 1024; // 100 MB
+    const oversized = files.filter(f => f.size > MAX);
     if (oversized.length) {
-      showToast(`حجم الملف كبير جداً (الحد الأقصى 3MB): ${oversized.map(f => f.name).join(', ')}`, 'error');
+      showToast(`Video is too large. Maximum size is 100 MB.`, 'error');
       return;
     }
     const localUrls = files.map(f => URL.createObjectURL(f));
@@ -86,7 +87,10 @@ function MediaUploader({ section, config, setConfig, uploadFiles, onUploadingCha
     setUploading(true);
     onUploadingChange?.(true);
     try {
-      const uploaded = await uploadFiles(files);
+      const uploaded = await uploadFiles(files, (percent) => {
+        // report progress via toast (lightweight)
+        showToast(`Uploading... ${percent}%`, 'info');
+      });
       setConfig(prev => {
         if (isArrayField(field)) {
           const current = Array.isArray(prev[section][field]) ? prev[section][field] : [];
@@ -114,14 +118,13 @@ function MediaUploader({ section, config, setConfig, uploadFiles, onUploadingCha
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {[
           { value: 'single_image', label: 'صورة واحدة', icon: '🖼️' },
-          { value: 'loop_images',  label: 'عدة صور (كاروسيل)', icon: '🎠' },
+          { value: 'loop_images', label: 'عدة صور (كاروسيل)', icon: '🎠' },
           { value: 'single_video', label: 'فيديو واحد', icon: '🎬' },
-          { value: 'two_videos',   label: 'فيديو مقدمة + رئيسي', icon: '🎥' },
-          { value: 'loop_videos',  label: 'عدة فيديوهات', icon: '📽️' },
+          { value: 'two_videos', label: 'فيديو مقدمة + رئيسي', icon: '🎥' },
+          { value: 'loop_videos', label: 'عدة فيديوهات', icon: '📽️' },
         ].map(opt => (
-          <label key={opt.value} className={`flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer text-xs transition ${
-            mode === opt.value ? 'border-brand-500 bg-brand-50 text-brand-800' : 'border-slate-200 bg-slate-50'
-          }`}>
+          <label key={opt.value} className={`flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer text-xs transition ${mode === opt.value ? 'border-brand-500 bg-brand-50 text-brand-800' : 'border-slate-200 bg-slate-50'
+            }`}>
             <input type="radio" name={`${section}-mode`} value={opt.value} checked={mode === opt.value} onChange={() => setMode(opt.value)} className="accent-brand-600" />
             {opt.icon} {opt.label}
           </label>
@@ -132,7 +135,7 @@ function MediaUploader({ section, config, setConfig, uploadFiles, onUploadingCha
         {(mode === 'single_image' || mode === 'loop_images') && (
           <div>
             <label className="block font-bold text-slate-700 mb-2 text-xs">📤 {mode === 'single_image' ? 'رفع صورة واحدة' : 'رفع عدة صور'}</label>
-            <input key={`${section}-img-${(sec.images||[]).length}`} type="file" accept="image/*"
+            <input key={`${section}-img-${(sec.images || []).length}`} type="file" accept="image/*"
               multiple={mode === 'loop_images'} disabled={uploading}
               onChange={(e) => handleUpload(e, 'images', mode === 'loop_images')} className="w-full text-xs" />
             <div className="mt-2 flex flex-wrap gap-2">
@@ -150,7 +153,7 @@ function MediaUploader({ section, config, setConfig, uploadFiles, onUploadingCha
           <div>
             <label className="block font-bold text-slate-700 mb-2 text-xs">📤 {mode === 'single_video' ? 'رفع فيديو واحد' : 'رفع عدة فيديوهات'}</label>
             <p className="text-[10px] text-slate-400 mb-2">يدعم: MP4 (H.264/AAC) فقط لضمان التشغيل على جميع المتصفحات</p>
-            <input key={`${section}-vid-${(sec.videos||[]).length}`} type="file" accept="video/*"
+            <input key={`${section}-vid-${(sec.videos || []).length}`} type="file" accept="video/*"
               multiple={mode === 'loop_videos'} disabled={uploading}
               onChange={(e) => handleUpload(e, 'videos', mode === 'loop_videos')} className="w-full text-xs" />
             <div className="mt-2 flex flex-wrap gap-2">
@@ -180,7 +183,7 @@ function MediaUploader({ section, config, setConfig, uploadFiles, onUploadingCha
             </div>
             <div>
               <label className="block font-bold text-slate-700 mb-1 text-xs">🔁 الفيديو الرئيسي (يتكرر)</label>
-              <input key={`${section}-mainvid-${(sec.videos||[]).length}`} type="file" accept="video/*" disabled={uploading}
+              <input key={`${section}-mainvid-${(sec.videos || []).length}`} type="file" accept="video/*" disabled={uploading}
                 onChange={(e) => handleUpload(e, 'videos', false)} className="w-full text-xs" />
               {(sec.videos || []).map((src, i) => (
                 <div key={i} className="mt-2 relative inline-block">
@@ -224,7 +227,7 @@ export default function AdminDashboard() {
       localStorage.setItem('sahtain_site_config', JSON.stringify(siteConfig));
     }
   }, [siteConfig]);
-  
+
   // Real-time Auto Refresh State
   const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState(true);
   const [lastUpdatedTime, setLastUpdatedTime] = useState(new Date());
@@ -320,19 +323,36 @@ export default function AdminDashboard() {
   }
 
   // Upload files to backend, return array of URLs
-  const uploadFiles = async (files) => {
+  const uploadFiles = async (files, onProgress) => {
     if (!files || files.length === 0) return [];
-    const oversized = files.filter(f => f.size > 3 * 1024 * 1024);
+    const MAX = 100 * 1024 * 1024; // 100 MB
+    const oversized = files.filter(f => f.size > MAX);
     if (oversized.length) {
-      const names = oversized.map(f => f.name).join(', ');
-      showToast(`حجم الملف كبير جداً (الحد الأقصى 3MB): ${names}`, 'error');
+      const names = oversized.map(f => `${f.name} (${(f.size / 1024 / 1024).toFixed(2)} MB)`).join(', ');
+      showToast(`Video is too large. Maximum size is 100 MB. Oversized: ${names}`, 'error');
       throw new Error('FILE_TOO_LARGE');
     }
+
+    // Show selected file sizes
+    for (const f of files) {
+      showToast(`${f.name}: ${(f.size / 1024 / 1024).toFixed(2)} MB`, 'info');
+    }
+
     const formData = new FormData();
     for (const file of files) {
       formData.append('files', file);
     }
-    const res = await API.post('/upload', formData);
+
+    // Use axios progress reporting if available
+    const res = await API.post('/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (e) => {
+        if (onProgress && e.total) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          onProgress(percent);
+        }
+      }
+    });
     return res.data.urls;
   };
 
@@ -611,7 +631,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      
+
       {/* Top Header Bar */}
       <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-xl">
         <div>
@@ -644,11 +664,10 @@ export default function AdminDashboard() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition whitespace-nowrap ${
-                isCurrent 
-                  ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20' 
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
+              className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition whitespace-nowrap ${isCurrent
+                ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20'
+                : 'text-slate-600 hover:bg-slate-100'
+                }`}
             >
               <Icon className="w-4 h-4" />
               <span>{tab.name}</span>
@@ -669,7 +688,7 @@ export default function AdminDashboard() {
             <div className="space-y-8 animate-fade-in">
               {/* Metric Cards */}
               <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
-                
+
                 <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-slate-400">إجمالي المبيعات</span>
@@ -766,13 +785,12 @@ export default function AdminDashboard() {
                           <td className="p-3 font-bold text-slate-900">{ord.total.toFixed(2)} ريال</td>
                           <td className="p-3 font-semibold text-slate-700">{ord.paymentMethod}</td>
                           <td className="p-3">
-                            <span className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold ${
-                              ord.orderStatus === 'تم التوصيل' ? 'bg-emerald-100 text-emerald-800' :
+                            <span className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold ${ord.orderStatus === 'تم التوصيل' ? 'bg-emerald-100 text-emerald-800' :
                               ord.orderStatus === 'خرج للتوصيل' ? 'bg-indigo-100 text-indigo-800' :
-                              ord.orderStatus === 'قيد التجهيز' ? 'bg-purple-100 text-purple-800' :
-                              ord.orderStatus === 'قيد المعالجة' ? 'bg-sky-100 text-sky-800' :
-                              'bg-amber-100 text-amber-800'
-                            }`}>
+                                ord.orderStatus === 'قيد التجهيز' ? 'bg-purple-100 text-purple-800' :
+                                  ord.orderStatus === 'قيد المعالجة' ? 'bg-sky-100 text-sky-800' :
+                                    'bg-amber-100 text-amber-800'
+                              }`}>
                               {ord.orderStatus}
                             </span>
                           </td>
@@ -917,13 +935,12 @@ export default function AdminDashboard() {
                           <td className="p-4 font-black text-slate-900 text-sm">{ord.total.toFixed(2)} ريال</td>
                           <td className="p-4 text-slate-600 font-semibold">{ord.paymentMethod}</td>
                           <td className="p-4">
-                            <span className={`px-3 py-1 rounded-full text-xs font-extrabold ${
-                              ord.orderStatus === 'تم التوصيل' ? 'bg-emerald-100 text-emerald-800' :
+                            <span className={`px-3 py-1 rounded-full text-xs font-extrabold ${ord.orderStatus === 'تم التوصيل' ? 'bg-emerald-100 text-emerald-800' :
                               ord.orderStatus === 'خرج للتوصيل' ? 'bg-indigo-100 text-indigo-800' :
-                              ord.orderStatus === 'قيد التجهيز' ? 'bg-purple-100 text-purple-800' :
-                              ord.orderStatus === 'قيد المعالجة' ? 'bg-sky-100 text-sky-800' :
-                              'bg-amber-100 text-amber-800'
-                            }`}>
+                                ord.orderStatus === 'قيد التجهيز' ? 'bg-purple-100 text-purple-800' :
+                                  ord.orderStatus === 'قيد المعالجة' ? 'bg-sky-100 text-sky-800' :
+                                    'bg-amber-100 text-amber-800'
+                              }`}>
                               {ord.orderStatus}
                             </span>
                           </td>
@@ -968,17 +985,16 @@ export default function AdminDashboard() {
                           المسؤول: <span className="font-bold text-slate-800">{b.contactName}</span> ({b.phone})
                         </p>
                       </div>
-                      
+
                       {/* Status Dropdown */}
                       <select
                         value={b.status}
                         onChange={(e) => handleUpdateB2bStatus(b._id, e.target.value)}
-                        className={`text-xs font-extrabold px-3 py-1.5 rounded-full border cursor-pointer focus:outline-none ${
-                          b.status === 'تم الاتفاق' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
+                        className={`text-xs font-extrabold px-3 py-1.5 rounded-full border cursor-pointer focus:outline-none ${b.status === 'تم الاتفاق' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
                           b.status === 'قيد التواصل' ? 'bg-sky-100 text-sky-800 border-sky-300' :
-                          b.status === 'تم الرفض' ? 'bg-rose-100 text-rose-800 border-rose-300' :
-                          'bg-amber-100 text-amber-800 border-amber-300'
-                        }`}
+                            b.status === 'تم الرفض' ? 'bg-rose-100 text-rose-800 border-rose-300' :
+                              'bg-amber-100 text-amber-800 border-amber-300'
+                          }`}
                       >
                         <option value="جديد">جديد</option>
                         <option value="قيد التواصل">قيد التواصل</option>
@@ -1014,17 +1030,16 @@ export default function AdminDashboard() {
                         <h4 className="font-extrabold text-slate-900 text-lg">{c.organizationName}</h4>
                         <p className="text-xs text-slate-500 mt-0.5">{c.organizationType} - {c.location}</p>
                       </div>
-                      
+
                       {/* Status Dropdown */}
                       <select
                         value={c.status}
                         onChange={(e) => handleUpdateCharityStatus(c._id, e.target.value)}
-                        className={`text-xs font-extrabold px-3 py-1.5 rounded-full border cursor-pointer focus:outline-none ${
-                          c.status === 'تم التوفير' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
+                        className={`text-xs font-extrabold px-3 py-1.5 rounded-full border cursor-pointer focus:outline-none ${c.status === 'تم التوفير' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
                           c.status === 'قيد المعالجة' ? 'bg-sky-100 text-sky-800 border-sky-300' :
-                          c.status === 'ملغي' ? 'bg-rose-100 text-rose-800 border-rose-300' :
-                          'bg-amber-100 text-amber-800 border-amber-300'
-                        }`}
+                            c.status === 'ملغي' ? 'bg-rose-100 text-rose-800 border-rose-300' :
+                              'bg-amber-100 text-amber-800 border-amber-300'
+                          }`}
                       >
                         <option value="جديد">جديد</option>
                         <option value="قيد المعالجة">قيد المعالجة</option>
@@ -1074,11 +1089,10 @@ export default function AdminDashboard() {
                     <div className="flex items-center justify-between pt-3 border-t border-slate-100 gap-2">
                       <button
                         onClick={() => handleToggleReviewApproved(r._id, r.approved)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                          r.approved
-                            ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                            : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
-                        }`}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${r.approved
+                          ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                          : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                          }`}
                       >
                         {r.approved ? <Check className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" />}
                         <span>{r.approved ? 'معتمد (ظاهر)' : 'معلّق'}</span>
@@ -1218,7 +1232,7 @@ export default function AdminDashboard() {
                   {/* 3 & 4. Coming Soon Controls */}
                   <div className="bg-white rounded-3xl p-6 border border-purple-200 bg-purple-50/20 shadow-xs space-y-6">
                     <h3 className="font-extrabold text-purple-900 text-lg border-b border-purple-100 pb-2">3 & 4. التحكم في أقسام (قريباً - Coming Soon)</h3>
-                    
+
                     {/* Coming Soon Hero Controls */}
                     <div className="space-y-4">
                       <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-purple-200">
@@ -1264,9 +1278,8 @@ export default function AdminDashboard() {
                             ...siteConfig,
                             comingSoonProductsSection: { ...siteConfig.comingSoonProductsSection, enabled: !siteConfig.comingSoonProductsSection?.enabled }
                           })}
-                          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition flex items-center gap-2 ${
-                            siteConfig.comingSoonProductsSection?.enabled ? 'bg-emerald-600 text-white' : 'bg-rose-100 text-rose-700'
-                          }`}
+                          className={`px-4 py-2 rounded-xl text-xs font-extrabold transition flex items-center gap-2 ${siteConfig.comingSoonProductsSection?.enabled ? 'bg-emerald-600 text-white' : 'bg-rose-100 text-rose-700'
+                            }`}
                         >
                           {siteConfig.comingSoonProductsSection?.enabled ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                           <span>{siteConfig.comingSoonProductsSection?.enabled ? 'ظاهر للزوار' : 'مخفي عن الزوار'}</span>
@@ -1303,88 +1316,88 @@ export default function AdminDashboard() {
 
                   </div>
 
-                   {/* Partners Section Controls */}
-                   <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-6">
-                     <h3 className="font-extrabold text-slate-900 text-lg border-b border-slate-100 pb-2">إدارة قسم الشركاء (Partners)</h3>
+                  {/* Partners Section Controls */}
+                  <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-6">
+                    <h3 className="font-extrabold text-slate-900 text-lg border-b border-slate-100 pb-2">إدارة قسم الشركاء (Partners)</h3>
 
-                     <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200">
-                       <span className="font-extrabold text-slate-900 text-sm">عرض / إخفاء قسم الشركاء</span>
-                       <button type="button"
-                         onClick={() => setSiteConfig({
-                           ...siteConfig,
-                           partnersSection: { ...siteConfig.partnersSection, enabled: !siteConfig.partnersSection?.enabled }
-                         })}
-                         className={`px-4 py-2 rounded-xl text-xs font-extrabold transition flex items-center gap-2 ${siteConfig.partnersSection?.enabled ? 'bg-emerald-600 text-white' : 'bg-rose-100 text-rose-700'}`}>
-                         {siteConfig.partnersSection?.enabled ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                         <span>{siteConfig.partnersSection?.enabled ? 'ظاهر للزوار' : 'مخفي عن الزوار'}</span>
-                       </button>
-                     </div>
+                    <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200">
+                      <span className="font-extrabold text-slate-900 text-sm">عرض / إخفاء قسم الشركاء</span>
+                      <button type="button"
+                        onClick={() => setSiteConfig({
+                          ...siteConfig,
+                          partnersSection: { ...siteConfig.partnersSection, enabled: !siteConfig.partnersSection?.enabled }
+                        })}
+                        className={`px-4 py-2 rounded-xl text-xs font-extrabold transition flex items-center gap-2 ${siteConfig.partnersSection?.enabled ? 'bg-emerald-600 text-white' : 'bg-rose-100 text-rose-700'}`}>
+                        {siteConfig.partnersSection?.enabled ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                        <span>{siteConfig.partnersSection?.enabled ? 'ظاهر للزوار' : 'مخفي عن الزوار'}</span>
+                      </button>
+                    </div>
 
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                       <div>
-                         <label className="block font-bold text-slate-700 mb-1">العنوان</label>
-                         <input type="text" value={siteConfig.partnersSection?.title || ''}
-                           onChange={(e) => setSiteConfig({
-                             ...siteConfig,
-                             partnersSection: { ...siteConfig.partnersSection, title: e.target.value }
-                           })}
-                           className="w-full bg-white border border-slate-200 rounded-xl p-3" />
-                       </div>
-                       <div>
-                         <label className="block font-bold text-slate-700 mb-1">الوصف</label>
-                         <input type="text" value={siteConfig.partnersSection?.description || ''}
-                           onChange={(e) => setSiteConfig({
-                             ...siteConfig,
-                             partnersSection: { ...siteConfig.partnersSection, description: e.target.value }
-                           })}
-                           className="w-full bg-white border border-slate-200 rounded-xl p-3" />
-                       </div>
-                     </div>
-
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-slate-800 text-xs">الشركاء الحاليون</span>
-                          <button type="button" onClick={addPartner}
-                            className="px-3 py-2 bg-brand-600 text-white rounded-xl text-xs font-bold hover:bg-brand-700 transition">
-                            + إضافة شريك
-                          </button>
-                        </div>
-
-                        <div className="space-y-2">
-                          {(siteConfig.partnersSection?.partners || []).map((partner, idx) => (
-                            <div key={idx} className="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
-                              <div className="relative shrink-0">
-                                <img src={partner.logo || 'https://via.placeholder.com/80x80?text=Logo'} alt={partner.name || 'شريك'} className="w-16 h-16 object-cover rounded-xl border border-slate-200 bg-white" />
-                                <label className="absolute -bottom-1 -left-1 cursor-pointer">
-                                  <input type="file" accept="image/*" className="hidden" disabled={isMediaUploading}
-                                    onChange={(e) => handlePartnerLogoUpload(e, idx)} />
-                                  <span className="flex items-center justify-center w-5 h-5 bg-brand-600 text-white rounded-full text-[10px] font-bold shadow">📷</span>
-                                </label>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <input type="text" value={partner.name || ''}
-                                  onChange={(e) => {
-                                    const updated = [...(siteConfig.partnersSection?.partners || [])];
-                                    updated[idx] = { ...updated[idx], name: e.target.value };
-                                    setSiteConfig({ ...siteConfig, partnersSection: { ...siteConfig.partnersSection, partners: updated } });
-                                  }}
-                                  placeholder="اسم الشريك"
-                                  className="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs" />
-                              </div>
-                              <button type="button" onClick={() => removePartner(idx)}
-                                className="shrink-0 px-3 py-2 bg-rose-100 text-rose-700 rounded-xl text-[11px] font-bold hover:bg-rose-200 transition">
-                                حذف
-                              </button>
-                            </div>
-                          ))}
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <label className="block font-bold text-slate-700 mb-1">العنوان</label>
+                        <input type="text" value={siteConfig.partnersSection?.title || ''}
+                          onChange={(e) => setSiteConfig({
+                            ...siteConfig,
+                            partnersSection: { ...siteConfig.partnersSection, title: e.target.value }
+                          })}
+                          className="w-full bg-white border border-slate-200 rounded-xl p-3" />
                       </div>
-                   </div>
+                      <div>
+                        <label className="block font-bold text-slate-700 mb-1">الوصف</label>
+                        <input type="text" value={siteConfig.partnersSection?.description || ''}
+                          onChange={(e) => setSiteConfig({
+                            ...siteConfig,
+                            partnersSection: { ...siteConfig.partnersSection, description: e.target.value }
+                          })}
+                          className="w-full bg-white border border-slate-200 rounded-xl p-3" />
+                      </div>
+                    </div>
 
-                   {/* 5. Footer Components Admin Control */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-800 text-xs">الشركاء الحاليون</span>
+                        <button type="button" onClick={addPartner}
+                          className="px-3 py-2 bg-brand-600 text-white rounded-xl text-xs font-bold hover:bg-brand-700 transition">
+                          + إضافة شريك
+                        </button>
+                      </div>
+
+                      <div className="space-y-2">
+                        {(siteConfig.partnersSection?.partners || []).map((partner, idx) => (
+                          <div key={idx} className="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                            <div className="relative shrink-0">
+                              <img src={partner.logo || 'https://via.placeholder.com/80x80?text=Logo'} alt={partner.name || 'شريك'} className="w-16 h-16 object-cover rounded-xl border border-slate-200 bg-white" />
+                              <label className="absolute -bottom-1 -left-1 cursor-pointer">
+                                <input type="file" accept="image/*" className="hidden" disabled={isMediaUploading}
+                                  onChange={(e) => handlePartnerLogoUpload(e, idx)} />
+                                <span className="flex items-center justify-center w-5 h-5 bg-brand-600 text-white rounded-full text-[10px] font-bold shadow">📷</span>
+                              </label>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <input type="text" value={partner.name || ''}
+                                onChange={(e) => {
+                                  const updated = [...(siteConfig.partnersSection?.partners || [])];
+                                  updated[idx] = { ...updated[idx], name: e.target.value };
+                                  setSiteConfig({ ...siteConfig, partnersSection: { ...siteConfig.partnersSection, partners: updated } });
+                                }}
+                                placeholder="اسم الشريك"
+                                className="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs" />
+                            </div>
+                            <button type="button" onClick={() => removePartner(idx)}
+                              className="shrink-0 px-3 py-2 bg-rose-100 text-rose-700 rounded-xl text-[11px] font-bold hover:bg-rose-200 transition">
+                              حذف
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 5. Footer Components Admin Control */}
                   <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-6">
                     <h3 className="font-extrabold text-slate-900 text-lg border-b border-slate-100 pb-2">5. التحكم الشامل في مكونات الفوتر (Footer Customizer)</h3>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                       {/* Brand Info Column Toggle */}
@@ -1539,7 +1552,7 @@ export default function AdminDashboard() {
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3"
                   />
                 </div>
-                
+
                 <label className="flex items-center gap-2 p-2 bg-purple-50 rounded-xl border border-purple-200 cursor-pointer">
                   <input
                     type="checkbox"
@@ -1640,19 +1653,18 @@ export default function AdminDashboard() {
                 <label className="block font-extrabold text-slate-800 text-sm">نوع الوسائط المرفقة بالمنتج</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {[
-                    { value: 'single_image',  label: 'صورة واحدة فقط',              icon: '🖼️',  desc: 'صورة ثابتة واحدة للمنتج' },
-                    { value: 'loop_images',   label: 'عدة صور تتكرر (كاروسيل)',    icon: '🎠',  desc: 'رفع عدة صور تعرض بالتناوب' },
-                    { value: 'single_video',  label: 'فيديو واحد فقط',              icon: '🎬',  desc: 'فيديو يشغّل ويتكرر تلقائياً' },
-                    { value: 'two_videos',    label: 'فيديو مقدمة + فيديو رئيسي',  icon: '🎥',  desc: 'فيديو مقدمة (مرة واحدة) ثم فيديو رئيسي يتكرر' },
-                    { value: 'loop_videos',   label: 'عدة فيديوهات تتكرر',          icon: '📽️',  desc: 'عدة فيديوهات في كاروسيل متكرر' },
+                    { value: 'single_image', label: 'صورة واحدة فقط', icon: '🖼️', desc: 'صورة ثابتة واحدة للمنتج' },
+                    { value: 'loop_images', label: 'عدة صور تتكرر (كاروسيل)', icon: '🎠', desc: 'رفع عدة صور تعرض بالتناوب' },
+                    { value: 'single_video', label: 'فيديو واحد فقط', icon: '🎬', desc: 'فيديو يشغّل ويتكرر تلقائياً' },
+                    { value: 'two_videos', label: 'فيديو مقدمة + فيديو رئيسي', icon: '🎥', desc: 'فيديو مقدمة (مرة واحدة) ثم فيديو رئيسي يتكرر' },
+                    { value: 'loop_videos', label: 'عدة فيديوهات تتكرر', icon: '📽️', desc: 'عدة فيديوهات في كاروسيل متكرر' },
                   ].map(opt => (
                     <label
                       key={opt.value}
-                      className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition ${
-                        prodMediaMode === opt.value
-                          ? 'border-brand-500 bg-brand-50 text-brand-800'
-                          : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'
-                      }`}
+                      className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition ${prodMediaMode === opt.value
+                        ? 'border-brand-500 bg-brand-50 text-brand-800'
+                        : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'
+                        }`}
                     >
                       <input
                         type="radio"
